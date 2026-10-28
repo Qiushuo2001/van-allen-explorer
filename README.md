@@ -36,6 +36,7 @@ The included NASA dataset covers **2015-03-16 00:00:00 through 2015-03-19 00:00:
 - **Play starts from the selected time**, advancing to the next UTC minute if necessary. If that time is outside the current playback interval, the interval moves to start at your selection, keeps its previous duration, and is shortened at the mission end. The From/To fields and timeline update together. Playback never returns to the bundled example because a requested date has not been downloaded; it retrieves that date or reports unavailable data.
 - Rotate with left-drag, zoom with the wheel/pinch, and pan with right-drag. **3D / XY / XZ** choose views; **↺** resets the camera. Each probe has an independent visibility toggle.
 - Select GSE, GSM or GEO and a trajectory half-window from ±1 to ±24 hours. Solid paths are past records, dashed paths future records relative to the selected time.
+- Each probe also shows **L, MLT, and MLAT**, matched to its plotted position sample. The magnetic values use SSCWeb's centered-dipole/SM convention regardless of the Cartesian frame selected for the 3D view.
 - **Export** saves loaded raw responses with provenance. **Import data** accepts that bundle, the downloader’s bundle, or raw SSCWeb JSON responses. Imports remain in memory until reload; put permanent downloads in `data/` using the downloader.
 
 ## Temporal accuracy and gaps
@@ -45,6 +46,28 @@ The included NASA dataset covers **2015-03-16 00:00:00 through 2015-03-19 00:00:
 By default, a time between records has no marker or coordinate value. The optional **Show nearest sample within 30 seconds** displays a real adjacent record, explicitly showing its own UTC and offset from your selection. It requires two contiguous bounding records and never extrapolates before/after coverage or bridges a gap. Nearest records are not represented as positions at the requested time.
 
 Trajectory lines are straight drawing segments between consecutive records, not analytical or simulated orbits. A missing minute, rejected invalid record, or discontinuity breaks the line. Playback may skip displayed minutes at high speed; it still uses only archived positions. The display’s decimal places do not imply an orbit-determination uncertainty.
+
+## L, MLT, and MLAT
+
+The magnetic readouts use additional **NASA SSCWeb** responses for definitive `rbspa` and `rbspb` ephemerides at native 60-second cadence. They are magnetic-model coordinates, not direct magnetic-field measurements.
+
+| Readout | NASA field | Convention |
+|---|---|---|
+| L | `DipoleLValue` | Centered-dipole L, dimensionless; equatorial crossing distance normalized by Earth's radius. |
+| MLT, h | SM `LocalTime` | Magnetic local time in decimal hours; 0 is midnight and 12 is noon. |
+| MLAT, ° | SM `Latitude` | Magnetic latitude at the spacecraft, relative to the magnetic equator. |
+
+This L is **not McIlwain L or drift-shell L\***; those require a different field-model product. MLAT is not invariant or footprint latitude. The interface labels the centered-dipole convention explicitly. See [NASA's coordinate definitions](https://sscweb.gsfc.nasa.gov/users_guide/Appendix_C.shtml).
+
+The client sends a `POST /locations` XML request selecting SM `Lat` and `Local_Time`, and `DipoleLValue=true`, with `ResolutionFactor=1`. Values come directly from the NASA response; the browser neither runs a magnetic-field model nor substitutes radial distance for L. Magnetic records must match the **actual plotted sample UTC exactly**, including when the nearest-sample option is enabled. The magnetic UTC appears in each card. Missing epochs, fill/invalid fields, and network failures show unavailable values, without interpolation or carry-forward. **Refresh magnetic data** retries the NASA request.
+
+The bundled magnetic responses cover March 16–18, 2015, including the March 19 midnight endpoint. Other dates load on demand in daily requests, with a 48-day in-memory cache. These requests support browser CORS on GitHub Pages. To extend local coverage:
+
+```sh
+python tools/download_magnetic.py --start 2017-09-07 --end 2017-09-10
+```
+
+The start is inclusive and the end exclusive. Raw responses, exact XML requests, retrieval times, and SHA-256 checksums are saved under `data/magnetic/`; reload the app afterward. Completed files are reused; `--refresh` downloads them again. The spacecraft Import/Export controls do not include this separate magnetic dataset.
 
 ## AE and Dst geomagnetic panels
 
@@ -144,6 +167,8 @@ js/ephemeris.js                 Retrieval, parsing, validation, sample selection
 js/scene.js                     Three.js rendering only
 js/indices.js                   Native OMNI index retrieval and interval lookup
 js/index-panels.js              Index display and independent loading state
+js/magnetic.js                  SSCWeb magnetic-data retrieval and validation
+js/magnetic-panels.js           L/MLT/MLAT display matched to plotted sample UTC
 vendor/three.module.js          Three.js 0.170.0 (included)
 vendor/OrbitControls.js         Matching controls; import changed to local module
 vendor/THREE-LICENSE.txt        Three.js MIT license
@@ -151,13 +176,17 @@ data/manifest.json             Local chunk index with source URLs and checksums
 data/observatories.json         Saved A/B metadata
 data/ssc-20150316-20150319.json  Authentic unmodified SSCWeb response
 data/indices/                   Raw AE/Dst samples, metadata and provenance
+data/magnetic/                  Raw L/MLT/MLAT responses, XML requests and provenance
 tools/serve.mjs                 Localhost-only static server, Node built-ins
 tools/download_ephemeris.py    Optional offline-data downloader
 tools/download_indices.py      Optional offline AE/Dst downloader
+tools/download_magnetic.py     Optional offline L/MLT/MLAT downloader
 tests/ephemeris.test.mjs        Data-integrity checks using the real fixture
 tests/controller.test.mjs       Playback and stale-request regression checks
 tests/indices.test.mjs          Native index epochs, bins, fill values and caching
 tests/index-panels.test.mjs     Timestamp display and concurrent-selection checks
+tests/magnetic.test.mjs         Authentic magnetic values, source hashes and retrieval
+tests/magnetic-panels.test.mjs  Position/magnetic sample alignment and gap handling
 ```
 
 Three.js and OrbitControls were obtained from the public `three@0.170.0` package via jsDelivr and are bundled with their license. No runtime CDN, font service, image service, analytics, or framework dependency is used. Uncached ephemerides and indices require a network request to NASA SSCWeb or CDAWeb. Live ephemerides are cached in memory (up to 48 daily chunks); Export preserves them across sessions. Metadata limits are deliberately pinned to the accompanying snapshot rather than silently adopting new mission coverage.
@@ -165,7 +194,7 @@ Three.js and OrbitControls were obtained from the public `three@0.170.0` package
 Run the integrity checks with:
 
 ```sh
-node --test tests/ephemeris.test.mjs tests/controller.test.mjs tests/indices.test.mjs tests/index-panels.test.mjs
+npm test
 ```
 
 They check source fixture hashes, exact component conversion, timestamps, coordinate frames, radial consistency across frames, missing/null records, gap boundaries, nearest-sample restrictions, partial imports, source export/import, offline failures, stale responses, playback timing, AE minute selection, Dst midpoint/interval boundaries, fill flags, and independent index-panel updates.

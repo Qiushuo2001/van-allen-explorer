@@ -1,6 +1,7 @@
 import { EphemerisStore, PROBES, MISSION_START, MISSION_END, sampleAt } from './ephemeris.js';
 import { OrbitScene } from './scene.js';
 import { GeomagneticPanels } from './index-panels.js';
+import { MagneticPanels } from './magnetic-panels.js';
 
 const $ = id => document.getElementById(id);
 const HOUR = 3600000, DAY = 24 * HOUR, MINUTE = 60000;
@@ -18,6 +19,7 @@ const fmtDate = t => new Intl.DateTimeFormat('en-GB', {timeZone:'UTC',day:'2-dig
 const fmtTick = t => `${iso(t).slice(0,10)} ${iso(t).slice(11,16)}`;
 const store = new EphemerisStore();
 const geomagnetic = new GeomagneticPanels();
+const magnetic = new MagneticPanels();
 const state = {
   time: Date.parse('2015-03-17T12:00:00Z'), frame:'gse', windowMs:6*HOUR,
   intervalStart:Date.parse('2015-03-17T00:00:00Z'), intervalEnd:Date.parse('2015-03-18T00:00:00Z'),
@@ -92,6 +94,7 @@ function updatePositions() {
     $('status-'+probe.id).textContent = sample ? (result.exact ? 'Exact archived sample' : `Nearest sample · ${result.offsetMs > 0 ? '+' : ''}${result.offsetMs/1000} s from selection`) : unavailableReason(probe,result);
     $('time-'+probe.id).textContent = sample ? `Sample UTC: ${iso(sample.t).slice(0,19).replace('T',' ')}` : 'Sample UTC: —';
   }
+  magnetic.setSelection({time:state.time,positions});
   scene?.setData({series, positions, time:state.time, windowMs:state.windowMs, maxGapMs:60001});
 }
 
@@ -320,7 +323,7 @@ function animate(now) {
   requestAnimationFrame(animate);
 }
 document.addEventListener('visibilitychange',()=>{state.lastFrame=performance.now();});
-window.addEventListener('beforeunload',()=>{state.controller?.abort();scene?.dispose();geomagnetic.dispose();});
+window.addEventListener('beforeunload',()=>{state.controller?.abort();scene?.dispose();geomagnetic.dispose();magnetic.dispose();});
 
 syncTime();
 requestAnimationFrame(animate);

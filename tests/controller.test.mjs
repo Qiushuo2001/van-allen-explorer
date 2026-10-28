@@ -33,7 +33,8 @@ function harness() {
   }
   class FakeScene {setFrame(){}setData(){}setVisibility(){}setView(){}resetView(){}dispose(){}}
   class FakeIndices {setTime(){}dispose(){}}
-  const context={PROBES,MISSION_START,MISSION_END,sampleAt,EphemerisStore:FakeStore,OrbitScene:FakeScene,GeomagneticPanels:FakeIndices,
+  class FakeMagnetic {setSelection(){}dispose(){}}
+  const context={PROBES,MISSION_START,MISSION_END,sampleAt,EphemerisStore:FakeStore,OrbitScene:FakeScene,GeomagneticPanels:FakeIndices,MagneticPanels:FakeMagnetic,
     document:{getElementById:get,querySelectorAll:()=>[],createTextNode:text=>({text}),createElement:()=>element(),addEventListener(){}},
     window:{addEventListener(){}},performance,AbortController,setTimeout(){return 1;},clearTimeout(){},requestAnimationFrame(){},console,
   };

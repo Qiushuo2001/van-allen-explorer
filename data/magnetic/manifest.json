@@ -1,0 +1,40 @@
+{
+  "format": "van-allen-magnetic-manifest-v1",
+  "model": "SSCWeb centered dipole / Solar Magnetic (SM)",
+  "documentation": "https://sscweb.gsfc.nasa.gov/users_guide/Appendix_C.shtml",
+  "chunks": [
+    {
+      "file": "ssc-magnetic-20150316.json",
+      "requestFile": "ssc-magnetic-20150316.xml",
+      "start": "2015-03-16T00:00:00Z",
+      "end": "2015-03-17T00:00:00Z",
+      "url": "https://sscweb.gsfc.nasa.gov/WS/sscr/2/locations",
+      "method": "POST",
+      "retrievedAt": "2026-10-28T18:21:29Z",
+      "sha256": "e0a849e20d78ed2b1f0a5936e7b996ab41a4946787b3c94eec8a489f886b3b50",
+      "cadenceSeconds": 60
+    },
+    {
+      "file": "ssc-magnetic-20150317.json",
+      "requestFile": "ssc-magnetic-20150317.xml",
+      "start": "2015-03-17T00:00:00Z",
+      "end": "2015-03-18T00:00:00Z",
+      "url": "https://sscweb.gsfc.nasa.gov/WS/sscr/2/locations",
+      "method": "POST",
+      "retrievedAt": "2026-10-28T18:21:30Z",
+      "sha256": "11310682950d1b47170e827d91174de9a669150e4d26283ebedd5fe87ef19311",
+      "cadenceSeconds": 60
+    },
+    {
+      "file": "ssc-magnetic-20150318.json",
+      "requestFile": "ssc-magnetic-20150318.xml",
+      "start": "2015-03-18T00:00:00Z",
+      "end": "2015-03-19T00:00:00Z",
+      "url": "https://sscweb.gsfc.nasa.gov/WS/sscr/2/locations",
+      "method": "POST",
+      "retrievedAt": "2026-10-28T18:21:31Z",
+      "sha256": "0b47883a71a763fba1d741cf10783f245996fca24c87525b3ce0404a4ad1565d",
+      "cadenceSeconds": 60
+    }
+  ]
+}
