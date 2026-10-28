@@ -71,7 +71,13 @@ The start is inclusive and the end exclusive. Raw responses, exact XML requests,
 
 ## AE and Dst geomagnetic panels
 
-The **Geomagnetic Context** panels follow the same selected UTC time, timeline, and playback controls as the spacecraft. These are ground-derived, global indices from WDC for Geomagnetism, Kyoto, distributed by NASA OMNI through the CDAWeb HAPI service. They are not local measurements aboard the probes and remain available independently of spacecraft operation or ephemeris gaps. No solar-wind propagation time shift is applied to the indices.
+The **Geomagnetic Context** plots follow the same selected UTC time, timeline, and playback controls as the spacecraft. AE and Dst are shown in two aligned plots spanning the selected UTC day, with time on the horizontal axis and nT on the vertical axis. The mint cursor follows the selected time, while compact readouts retain the exact measurement, source timestamp, and quality information.
+
+Hover over a plot to inspect a measured bin and its original UTC timestamp. Click to move the spacecraft time to that UTC minute. With a plot focused, use Left/Right to move one minute, or Shift+Left/Right for one hour. Selecting a different day automatically loads and redraws that day's plots. The plot range is the selected UTC day, independent of the playback interval and trajectory window.
+
+Both traces show the native averaging bins as steps: one minute for AE and one hour for Dst. No smoothing, temporal interpolation, or downsampling is applied. The hourly Dst step occupies its actual hour, with the original midpoint timestamp preserved in the inspection readout. Missing/invalid bins appear as empty, shaded gaps without a connecting line. Each vertical scale is fitted to that day's valid values and includes zero. Loading or retrieval failure clears the previous day's trace immediately.
+
+These are ground-derived, global indices from WDC for Geomagnetism, Kyoto, distributed by NASA OMNI through the CDAWeb HAPI service. They are not local measurements aboard the probes and remain available independently of spacecraft operation or ephemeris gaps. No solar-wind propagation time shift is applied to the indices.
 
 | Index | NASA dataset / parameter | Native timestamp | Selected measurement |
 |---|---|---|---|
@@ -167,6 +173,7 @@ js/ephemeris.js                 Retrieval, parsing, validation, sample selection
 js/scene.js                     Three.js rendering only
 js/indices.js                   Native OMNI index retrieval and interval lookup
 js/index-panels.js              Index display and independent loading state
+js/index-plot.js                SVG time-series plots and UTC interaction
 js/magnetic.js                  SSCWeb magnetic-data retrieval and validation
 js/magnetic-panels.js           L/MLT/MLAT display matched to plotted sample UTC
 vendor/three.module.js          Three.js 0.170.0 (included)
@@ -185,6 +192,7 @@ tests/ephemeris.test.mjs        Data-integrity checks using the real fixture
 tests/controller.test.mjs       Playback and stale-request regression checks
 tests/indices.test.mjs          Native index epochs, bins, fill values and caching
 tests/index-panels.test.mjs     Timestamp display and concurrent-selection checks
+tests/index-plot.test.mjs       Native-bin geometry, gaps, UTC axes and interaction
 tests/magnetic.test.mjs         Authentic magnetic values, source hashes and retrieval
 tests/magnetic-panels.test.mjs  Position/magnetic sample alignment and gap handling
 ```

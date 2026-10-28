@@ -1,6 +1,6 @@
 import { EphemerisStore, PROBES, MISSION_START, MISSION_END, sampleAt } from './ephemeris.js';
 import { OrbitScene } from './scene.js';
-import { GeomagneticPanels } from './index-panels.js';
+import { GeomagneticPanels } from './index-panels.js?v=1.3.0';
 import { MagneticPanels } from './magnetic-panels.js';
 
 const $ = id => document.getElementById(id);
@@ -18,7 +18,7 @@ const clamp = t => Math.max(MISSION_START, Math.min(MISSION_END, t));
 const fmtDate = t => new Intl.DateTimeFormat('en-GB', {timeZone:'UTC',day:'2-digit',month:'short',year:'numeric'}).format(t).toUpperCase();
 const fmtTick = t => `${iso(t).slice(0,10)} ${iso(t).slice(11,16)}`;
 const store = new EphemerisStore();
-const geomagnetic = new GeomagneticPanels();
+const geomagnetic = new GeomagneticPanels({onSeek:time=>seek(time)});
 const magnetic = new MagneticPanels();
 const state = {
   time: Date.parse('2015-03-17T12:00:00Z'), frame:'gse', windowMs:6*HOUR,

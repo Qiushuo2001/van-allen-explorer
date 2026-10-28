@@ -1,16 +1,21 @@
 import { GeomagneticStore, lookupIndex } from './indices.js';
+import { IndexPlot } from './index-plot.js';
 
 const MINUTE = 60000, HOUR = 3600000, DAY = 86400000;
 const utc = t => new Date(t).toISOString().slice(0,19).replace('T',' ');
 const dayOf = t => Math.floor(t / DAY) * DAY;
+const EMPTY_RECORDS=Object.freeze([]);
 const kinds = {bundled:'Bundled NASA response',live:'Live NASA response',imported:'Imported NASA response',unavailable:'No response loaded'};
 
 /** Global geomagnetic indices have their own availability and never depend on a probe's orbit. */
 export class GeomagneticPanels {
-  constructor({store = new GeomagneticStore(), document = globalThis.document, delay = 120} = {}) {
+  constructor({store = new GeomagneticStore(), document = globalThis.document, delay = 120,
+    onSeek=()=>{}, plotFactory=options=>new IndexPlot(options)} = {}) {
     this.store=store; this.document=document; this.delay=delay;
     this.time=null; this.pendingDay=null; this.version=0; this.controller=null; this.timer=null;
     this.$=id=>document.getElementById(id);
+    this.plotInputs=new Map();
+    this.plots=Object.fromEntries(['ae','dst'].map(key=>[key,plotFactory({element:this.$(`index-${key}-plot`),key,document,onSeek})]));
     this.$('indices-retry').addEventListener('click',()=>{ if(this.time!==null) this.setTime(this.time,{force:true}); });
   }
 
@@ -46,11 +51,20 @@ export class GeomagneticPanels {
   }
 
   render(day,{loading=false,error=null}={}) {
+    const start=day?.dayStart ?? dayOf(this.time),end=day?.dayEnd ?? start+DAY;
+    this.$('indices-day').textContent=`${new Date(start).toISOString().slice(0,10)} · 00:00–24:00 UTC`;
     for(const id of ['ae','dst']) {
       const lookup=day ? lookupIndex(day[id],this.time) : {sample:null,status:'missing'};
       const sample=lookup.sample;
       const source=day?.sources?.[id];
       const failure=error || day?.errors?.[id];
+      // Geometry depends on the loaded day, never on the moving playback cursor.
+      const input={records:failure?EMPTY_RECORDS:(day?.[id]??EMPTY_RECORDS),start,end,loading,error:failure||null};
+      const previous=this.plotInputs.get(id);
+      if(!previous||Object.keys(input).some(key=>input[key]!==previous[key])) {
+        this.plots[id].setData(input);this.plotInputs.set(id,input);
+      }
+      this.plots[id].setTime(this.time);
       const valid=lookup.status==='valid' && sample && !failure;
       const duration=id==='ae' ? MINUTE : HOUR;
       const binStart=sample?.start ?? Math.floor(this.time/duration)*duration;
@@ -85,5 +99,5 @@ export class GeomagneticPanels {
     this.controller?.abort(); this.controller=null; this.pendingDay=null;
   }
 
-  dispose() {this.cancel();}
+  dispose() {this.cancel();for(const plot of Object.values(this.plots)) plot.dispose();}
 }

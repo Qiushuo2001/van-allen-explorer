@@ -7,35 +7,55 @@
 @media(prefers-reduced-motion:reduce){*{transition:none!important}.spinner{animation:none}}
 @media(max-width:520px){.scene-heading h1{font-size:17px;max-width:170px}.scene-heading .eyebrow{font-size:9px}.view-buttons{top:62px}}
 
-/* Measured geomagnetic context stays separate from spacecraft coordinates. */
-.indices-section{border-top:1px solid var(--line);background:var(--panel-deep);padding:14px 26px 12px}
+/* Measured geomagnetic time series share a UTC axis and the existing index colors. */
+.indices-section{border-top:1px solid var(--line);background:var(--panel-deep);padding:18px 26px}
 .indices-heading{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:10px}
 .indices-heading>div{display:flex;align-items:center;gap:15px;flex-wrap:wrap}
-.indices-cadence{font:10px var(--mono);color:#93a1b3;white-space:nowrap}
+.indices-day{font:11px var(--mono);color:#b6c6d8}
 .indices-heading .text-button{font-size:10px;flex-shrink:0;color:#bac8db}
-.indices-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.index-card{--index-accent:#c8b4ed;--index-border:#443a5a;min-width:0;padding:10px 13px;background:linear-gradient(115deg,#1b2034,#111b29);border:1px solid var(--index-border);border-radius:7px}
-.index-dst{--index-accent:#dba4b4;--index-border:#513e4c;background:linear-gradient(115deg,#26212f,#151b28)}
-.index-card-heading{display:flex;align-items:baseline;gap:9px}
-.index-card-heading h2{font-size:12px;font-weight:650;color:var(--index-accent)}
-.index-card-heading>span{font-size:10px;color:#9ba8bc}
-.index-measurement{display:flex;align-items:center;gap:14px;margin:4px 0 6px;min-height:35px}
-.index-number{display:flex;align-items:baseline;gap:6px;flex-shrink:0;font:30px/1.15 var(--mono);color:var(--index-accent);font-variant-numeric:tabular-nums}
-.index-number small{font:11px var(--mono);color:#a3aabd}
-.index-state{font-size:10px;line-height:1.5;color:#b4bfd0;overflow-wrap:anywhere}
-.index-timestamps{font:10px/1.6 var(--mono);color:#a2afc2;overflow-wrap:anywhere}
-.index-provenance{margin-top:7px;padding-top:6px;border-top:1px solid #354052;font-size:10px;line-height:1.5;overflow-wrap:anywhere}
-.index-provenance a{color:var(--index-accent);text-decoration-color:#7b6c8a;text-underline-offset:2px}
-.index-provenance a:hover{color:var(--text)}
-.index-quality{color:#9caabd;margin-top:2px}
-.index-origin{color:#8e9eb2;margin-top:2px}
-.index-origin:empty{display:none}
-.indices-note{font-size:10px;line-height:1.5;color:#92a3b8;margin-top:9px}
-.index-card.missing .index-number,.index-card.loading .index-number{color:#8e92a4}
-.index-card.error .index-state{color:#f0b4ad}
-@media(max-width:1120px){.indices-section{padding-left:18px;padding-right:18px}.indices-heading>div{gap:5px 12px}.index-measurement{gap:10px}.index-card{padding:10px}}
-@media(max-width:600px){.indices-section{padding:14px}.indices-heading{align-items:flex-start}.indices-heading>div{display:flex;flex-direction:column;align-items:flex-start;gap:4px}.indices-grid{grid-template-columns:1fr;gap:10px}.index-card{padding:11px 13px}.index-measurement{gap:18px}.index-provenance{display:grid;grid-template-columns:auto 1fr;gap:2px 12px}.index-quality{margin:0}.index-origin{grid-column:1/-1}}
-@media(max-width:360px){.index-provenance{display:block}.index-quality{margin-top:2px}}
+.plot-legend{display:flex;align-items:center;flex-wrap:wrap;gap:8px 18px;font-size:10px;color:#93a5ba;margin:0 0 15px}
+.plot-legend>span{display:flex;align-items:center;gap:6px}.plot-legend .plot-help{margin-left:auto}
+.plot-selected-key{display:inline-block;height:10px;border-left:2px solid var(--mint)}
+.plot-gap-key{display:inline-block;width:12px;height:10px;background:#71849a25;border:1px solid #71849a66}
+.indices-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+.index-card{--index-accent:#c8b4ed;--index-border:#443a5a;min-width:0;padding:15px 17px 12px;background:linear-gradient(115deg,#191f30,#101b29);border:1px solid var(--index-border);border-radius:8px}
+.index-dst{--index-accent:#dba4b4;--index-border:#513e4c;background:linear-gradient(115deg,#231f2c,#121b28)}
+.index-plot-header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:5px}
+.index-card-heading{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.index-card-heading h2{font-size:16px;font-weight:650;color:var(--index-accent)}
+.index-card-heading>span{font-size:11px;color:#a7b4c7}.index-card-heading .index-resolution{font:9px var(--mono);color:#9babc0;border:1px solid #3a4358;padding:2px 5px;border-radius:3px}
+.index-measurement{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
+.index-selected-label{font-size:8px;letter-spacing:1px;color:#92a3b8}
+.index-number{display:flex;align-items:baseline;gap:5px;font:22px/1.2 var(--mono);color:var(--index-accent);font-variant-numeric:tabular-nums}
+.index-number small{font:10px var(--mono);color:#a3aabd}
+.index-state{font-size:10px;line-height:1.5;color:#a8b8cd;overflow-wrap:anywhere;margin-top:4px}
+.index-plot{position:relative;min-width:0;border-radius:5px;outline-offset:4px}
+.index-plot:focus-visible{outline:2px solid var(--mint)}
+.index-plot-svg{display:block;width:100%;height:210px;overflow:visible;touch-action:pan-y;cursor:crosshair}
+.plot-grid-line{stroke:#7b8da5;stroke-opacity:.17;stroke-width:1;vector-effect:non-scaling-stroke}
+.plot-zero-line{stroke:#91a3bb;stroke-opacity:.4;stroke-width:1;vector-effect:non-scaling-stroke}
+.plot-axis-line{stroke:#6f839d;stroke-opacity:.55;stroke-width:1;vector-effect:non-scaling-stroke}
+.plot-tick{font:11px var(--mono);fill:#a1b1c6}.plot-axis-label{font:10px var(--mono);fill:#b9c6d7}
+.plot-gap{fill:#71849a;fill-opacity:.12;stroke:none}
+.plot-trace{fill:none;stroke:var(--index-accent);stroke-width:1.6;stroke-linejoin:miter;vector-effect:non-scaling-stroke}
+.plot-cursor{stroke:var(--mint);stroke-width:1.2;stroke-dasharray:4 4;vector-effect:non-scaling-stroke;pointer-events:none}
+.plot-cursor-point{fill:var(--mint);stroke:#111d2d;stroke-width:2;pointer-events:none}
+.plot-cursor-label{fill:var(--mint);font:10px var(--mono);pointer-events:none}
+.plot-hover{stroke:#dde4ed;stroke-opacity:.7;stroke-width:1;stroke-dasharray:2 3;pointer-events:none}
+.plot-hover-point{fill:var(--index-accent);stroke:#fff;stroke-width:1.5;pointer-events:none}
+.plot-status{position:absolute;top:82px;left:55px;right:18px;text-align:center;font-size:12px;color:#bdcada;pointer-events:none;background:#142132e8;padding:8px 12px;border-radius:4px}
+.plot-status:empty{display:none}
+.plot-inspection{display:flex;flex-wrap:wrap;align-items:baseline;gap:3px 12px;min-height:35px;padding:4px 0 7px;line-height:1.5;color:#98a9bf;font-size:10px}
+.plot-inspection-value{color:var(--index-accent);font:11px var(--mono)}
+.plot-inspection-time{font:9px/1.5 var(--mono);overflow-wrap:anywhere}
+.index-details-row{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:5px 16px;border-top:1px solid #354052;padding-top:8px}
+.index-timestamps{font:9px/1.65 var(--mono);color:#a2afc2;overflow-wrap:anywhere}
+.index-provenance{font-size:9px;line-height:1.5;overflow-wrap:anywhere}
+.index-provenance a{color:var(--index-accent);text-decoration-color:#7b6c8a;text-underline-offset:2px}.index-provenance a:hover{color:var(--text)}
+.index-quality{color:#9caabd;margin-top:2px}.index-origin{color:#8e9eb2;margin-top:2px}.index-origin:empty{display:none}
+.indices-note{font-size:10px;line-height:1.6;color:#92a3b8;margin-top:12px}
+@media(max-width:1120px){.indices-section{padding:16px 18px}.indices-heading>div{gap:5px 12px}.index-card{padding:13px}}
+@media(max-width:600px){.indices-section{padding:16px 14px}.indices-heading{align-items:flex-start}.indices-heading>div{flex-direction:column;align-items:flex-start;gap:5px}.plot-legend{gap:7px 15px}.plot-legend .plot-help{margin-left:0;flex-basis:100%}.indices-grid{gap:13px}.index-card{padding:12px 10px}.index-card-heading{gap:3px 8px}.index-card-heading>span{font-size:10px}.index-card-heading .index-resolution{font-size:8px}.index-details-row{grid-template-columns:minmax(0,1fr);gap:7px}.index-provenance{display:block}.index-number{font-size:20px}.index-selected-label{font-size:7px;letter-spacing:.4px}.plot-inspection{min-height:45px}.plot-status{left:46px;right:10px;font-size:10px}}
 
 /* NASA magnetic coordinates belong to the displayed spacecraft sample. */
 .magnetic-block{border-top:1px solid #293b4d;margin-top:13px;padding-top:11px}
