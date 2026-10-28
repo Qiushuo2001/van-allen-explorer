@@ -1,8 +1,14 @@
 # Van Allen Mission Explorer
 
-A local HTML/CSS/JavaScript application for the **definitive NASA SSCWeb ephemerides** of Van Allen Probe A (`rbspa`) and Probe B (`rbspb`). Includes interactive Three.js navigation, UTC time selection, mission/interval timelines, playback, configurable trajectory windows, GSE/GSM/GEO coordinates, per-probe availability, source-data import/export, and measured **AE/Dst geomagnetic index panels**.
+A browser-based HTML/CSS/JavaScript application for the **definitive NASA SSCWeb ephemerides** of Van Allen Probe A (`rbspa`) and Probe B (`rbspb`). Includes interactive Three.js navigation, UTC time selection, mission/interval timelines, playback, configurable trajectory windows, GSE/GSM/GEO coordinates, per-probe availability, source-data import/export, and measured **AE/Dst geomagnetic index panels**.
 
-## Run
+## Use online
+
+Open **[Van Allen Mission Explorer](https://qiushuo2001.github.io/van-allen-explorer/)** in a current browser with WebGL enabled. No installation or local server is needed. The app includes the March 2015 dataset and retrieves other mission dates directly from NASA services.
+
+GitHub Pages publishes the root of the `main` branch. Pushing changes to `main` automatically updates the site. The `.nojekyll` file keeps the HTML, JavaScript, and scientific data as static files, without Jekyll processing.
+
+## Run locally
 
 Extract the ZIP, open a terminal in the `van-allen-explorer` directory, and run either:
 
