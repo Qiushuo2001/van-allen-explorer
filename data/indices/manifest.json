@@ -1,0 +1,32 @@
+{
+  "format": "van-allen-indices-manifest-v1",
+  "chunks": [
+    {
+      "index": "ae",
+      "dataset": "OMNI_HRO_1MIN",
+      "end": "2015-03-19T00:00:00Z",
+      "url": "https://cdaweb.gsfc.nasa.gov/hapi/data?id=OMNI_HRO_1MIN&parameters=Time,AE_INDEX&time.min=2015-03-16T00:00:00Z&time.max=2015-03-19T00:00:00Z&format=json&include=header",
+      "retrievedAt": "2026-10-23T16:08:13.1798896Z",
+      "sha256": "47eef3b25f093b88a2a08a99ac3a8c13c7881d3c19a70416a1ecc66f74de2e6e",
+      "file": "ae-20150316-20150319.json",
+      "start": "2015-03-16T00:00:00Z",
+      "parameter": "AE_INDEX"
+    },
+    {
+      "index": "dst",
+      "dataset": "OMNI2_H0_MRG1HR",
+      "end": "2015-03-19T00:00:00Z",
+      "url": "https://cdaweb.gsfc.nasa.gov/hapi/data?id=OMNI2_H0_MRG1HR&parameters=Time,DST1800&time.min=2015-03-16T00:00:00Z&time.max=2015-03-19T00:00:00Z&format=json&include=header",
+      "retrievedAt": "2026-10-23T16:08:14.0166937Z",
+      "sha256": "11c3ef2879b0a48dfa2326ca78360bbf42cde10e27485b0ce54c7d9d17da173c",
+      "file": "dst-20150316-20150319.json",
+      "start": "2015-03-16T00:00:00Z",
+      "parameter": "DST1800"
+    }
+  ],
+  "metadata": {
+    "sources": "sources.json",
+    "ae": "ae-info.json",
+    "dst": "dst-info.json"
+  }
+}

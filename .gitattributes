@@ -1,0 +1,3 @@
+* text=auto eol=lf
+# Preserve the exact source-response bytes used by provenance checksums.
+data/** -text

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Explore the historical orbits of NASA's Van Allen Probes using definitive SSCWeb spacecraft ephemerides.">
+  <title>Van Allen · Mission Explorer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand" href="./" aria-label="Van Allen Mission Explorer home">
+      <svg viewBox="0 0 42 42" aria-hidden="true"><circle cx="21" cy="21" r="7"/><ellipse cx="21" cy="21" rx="20" ry="10" transform="rotate(-38 21 21)"/><circle cx="34" cy="11" r="3" class="sat"/></svg>
+      <span>VAN ALLEN<small>MISSION EXPLORER</small></span>
+    </a>
+    <div class="header-center"><span class="eyebrow">EARTH’S RADIATION BELT MISSION</span><span>30 AUG 2012 <span class="dash">—</span> 18 OCT 2019</span></div>
+    <button class="text-button" id="about-button">Data & methodology <span aria-hidden="true">↗</span></button>
+  </header>
+
+  <main>
+    <section class="workspace" aria-label="Mission exploration workspace">
+      <div class="view-column">
+        <div class="scene-wrap">
+          <div id="scene" aria-label="Interactive 3D geocentric spacecraft view. Drag to rotate, scroll to zoom, right-drag to pan."></div>
+          <div class="scene-heading"><span class="eyebrow">ORBITAL VIEW</span><h1>Two probes.<br>One dynamic environment.</h1><p>Historical spacecraft positions around Earth</p></div>
+          <div class="scene-top-right"><span class="pill" id="frame-badge">GSE · R<sub>E</sub></span><span class="pill subdued">EARTH TO SCALE</span></div>
+          <div class="view-buttons" aria-label="Camera views"><button data-view="oblique" class="active" title="Oblique view">3D</button><button data-view="xy" title="View XY plane">XY</button><button data-view="xz" title="View XZ plane">XZ</button><span></span><button id="reset-view" title="Reset camera view" aria-label="Reset camera view">↺</button></div>
+          <div class="scene-legend"><span><i class="key a"></i>Probe A</span><span><i class="key b"></i>Probe B</span><span class="legend-note"><i class="line-key"></i>Past <i class="line-key future"></i>Future</span></div>
+          <div class="scene-help">Drag to rotate <b>·</b> Scroll to zoom <b>·</b> Right-drag to pan<br><span>Earth is schematic. Paths connect consecutive archived samples.</span></div>
+          <div class="loading-overlay" id="loading" role="status"><span class="spinner"></span><span id="loading-text">Opening the mission archive…</span></div>
+          <div class="scene-error hidden" id="scene-error" role="alert"></div>
+        </div>
+        <section class="timeline-panel" aria-label="Time navigation">
+          <div class="timeline-heading"><div><span class="eyebrow">SELECTED TIME · UTC</span><div class="time-display" id="time-display">17 MAR 2015 <span>12:00:00</span></div></div><div class="timeline-scope"><button id="scope-mission">Mission</button><button id="scope-interval" class="active">Playback interval</button></div></div>
+          <label class="sr-only" for="timeline">Selected time within timeline</label><input type="range" id="timeline" min="0" max="1440" step="60" value="720">
+          <div class="timeline-ticks"><span id="timeline-start"></span><span id="timeline-mid"></span><span id="timeline-end"></span></div>
+          <div class="transport"><div class="transport-buttons"><button id="step-back" title="Previous archived minute" aria-label="Back one minute">−1m</button><button class="play-button" id="play" disabled><span id="play-icon">▶</span><span id="play-label">Play</span></button><button id="step-forward" title="Next archived minute" aria-label="Forward one minute">+1m</button></div><label class="speed-label" for="speed">Speed<select id="speed"><option value="60">1 min / sec</option><option value="300">5 min / sec</option><option value="900" selected>15 min / sec</option><option value="3600">1 hour / sec</option></select></label><label class="check-label"><input type="checkbox" id="loop">Loop</label></div>
+        </section>
+        <section class="indices-section" id="indices-section" aria-label="Measured geomagnetic indices at the selected time">
+          <div class="indices-heading"><div><span class="eyebrow">GEOMAGNETIC CONTEXT</span><span class="indices-cadence">AE · 1 min / Dst · 1 hour</span></div><button id="indices-retry" class="text-button">Refresh indices</button></div>
+          <div class="indices-grid">
+            <article class="index-card index-ae" aria-labelledby="index-ae-title">
+              <div class="index-card-heading"><h2 id="index-ae-title">AE</h2><span>Auroral electrojet</span></div>
+              <div class="index-measurement"><div class="index-number"><span id="index-ae-value">—</span><small>nT</small></div><p class="index-state" id="index-ae-state" role="status">Loading measurement…</p></div>
+              <div class="index-timestamps"><p id="index-ae-time">Source timestamp: —</p><p id="index-ae-interval">Minute UTC: —</p></div>
+              <div class="index-provenance"><a id="index-ae-source" href="https://cdaweb.gsfc.nasa.gov/" target="_blank" rel="noopener">NASA OMNI · Kyoto</a><p class="index-quality" id="index-ae-quality">Status not specified by source</p><p class="index-origin" id="index-ae-origin"></p></div>
+            </article>
+            <article class="index-card index-dst" aria-labelledby="index-dst-title">
+              <div class="index-card-heading"><h2 id="index-dst-title">Dst</h2><span>Disturbance storm time</span></div>
+              <div class="index-measurement"><div class="index-number"><span id="index-dst-value">—</span><small>nT</small></div><p class="index-state" id="index-dst-state" role="status">Loading measurement…</p></div>
+              <div class="index-timestamps"><p id="index-dst-time">Source timestamp: —</p><p id="index-dst-interval">Hour UTC: —</p></div>
+              <div class="index-provenance"><a id="index-dst-source" href="https://cdaweb.gsfc.nasa.gov/" target="_blank" rel="noopener">NASA OMNI · Kyoto</a><p class="index-quality" id="index-dst-quality">Status not specified by source</p><p class="index-origin" id="index-dst-origin"></p></div>
+            </article>
+          </div>
+          <p class="indices-note">Minute AE and hourly Dst are measured indices. No temporal interpolation.</p>
+        </section>
+        <section class="interval-panel" aria-label="Playback time interval"><div class="interval-title"><span class="eyebrow">PLAYBACK INTERVAL · UTC</span><button id="center-day" class="text-button">Use selected day</button></div><div class="interval-inputs"><label>From<input id="interval-start" type="datetime-local" step="60" value="2015-03-17T00:00"></label><span aria-hidden="true">→</span><label>To<input id="interval-end" type="datetime-local" step="60" value="2015-03-18T00:00"></label><button id="apply-interval">Apply</button></div><p id="interval-message" class="small-note" role="status">Playback advances through archived minutes; it does not propagate an orbit.</p></section>
+      </div>
+
+      <aside class="inspector" aria-label="Time and spacecraft position controls">
+        <section class="controls-section"><div class="section-title"><span class="eyebrow">01 / OBSERVATION</span><span class="live-dot"></span></div><label for="selected-time">Date & time <span class="unit-label">UTC</span></label><input type="datetime-local" id="selected-time" step="1" value="2015-03-17T12:00:00"><div class="control-grid"><label for="frame">Coordinate system<select id="frame"><option value="gse">GSE</option><option value="gsm">GSM</option><option value="geo">GEO</option></select></label><label for="window">Trajectory window<select id="window"><option value="1">± 1 hour</option><option value="3">± 3 hours</option><option value="6" selected>± 6 hours</option><option value="12">± 12 hours</option><option value="24">± 24 hours</option></select></label></div><p class="frame-description" id="frame-description">Geocentric Solar Ecliptic. +X points toward the Sun; +Z toward ecliptic north.</p></section>
+        <section class="position-section"><div class="section-title"><span class="eyebrow">02 / SPACECRAFT POSITIONS</span><span class="unit-label">R<sub>E</sub></span></div>
+          <article class="probe-card probe-a" id="card-rbspa"><div class="probe-heading"><h2><i class="key a"></i>Probe A <span>RBSP-A</span></h2><label class="visibility-toggle" title="Show Probe A"><input type="checkbox" id="show-rbspa" checked aria-label="Show Probe A"><span></span></label></div><p class="sample-status" id="status-rbspa">Waiting for data</p><dl class="coordinates"><div><dt>X</dt><dd id="x-rbspa">—</dd></div><div><dt>Y</dt><dd id="y-rbspa">—</dd></div><div><dt>Z</dt><dd id="z-rbspa">—</dd></div></dl><div class="radius-row"><span>Distance from center</span><strong id="r-rbspa">— <small>R<sub>E</sub></small></strong></div><div class="sample-time" id="time-rbspa">Sample UTC: —</div></article>
+          <article class="probe-card probe-b" id="card-rbspb"><div class="probe-heading"><h2><i class="key b"></i>Probe B <span>RBSP-B</span></h2><label class="visibility-toggle" title="Show Probe B"><input type="checkbox" id="show-rbspb" checked aria-label="Show Probe B"><span></span></label></div><p class="sample-status" id="status-rbspb">Waiting for data</p><dl class="coordinates"><div><dt>X</dt><dd id="x-rbspb">—</dd></div><div><dt>Y</dt><dd id="y-rbspb">—</dd></div><div><dt>Z</dt><dd id="z-rbspb">—</dd></div></dl><div class="radius-row"><span>Distance from center</span><strong id="r-rbspb">— <small>R<sub>E</sub></small></strong></div><div class="sample-time" id="time-rbspb">Sample UTC: —</div></article>
+          <label class="check-label nearest-option"><input type="checkbox" id="nearest">Show nearest sample within 30 seconds</label><p class="small-note">Exact samples by default. Between samples or in data gaps, markers are hidden. No position interpolation.</p>
+        </section>
+        <section class="source-section"><div class="section-title"><span class="eyebrow">03 / DATA SOURCE</span><span class="source-tag">NASA SPDF</span></div><p class="source-name">SSCWeb definitive ephemeris</p><p id="data-status" class="small-note" role="status">Loading archive…</p><div class="data-actions"><button id="retry">Refresh</button><button id="import-button">Import data</button><button id="export-button" disabled>Export</button></div><input type="file" id="import-file" accept=".json,application/json" multiple hidden><p class="small-note" id="import-status" role="status"></p></section>
+      </aside>
+    </section>
+    <footer><span><span class="footer-dot"></span>Historical data, never simulated orbits</span><span>1 R<sub>E</sub> = 6,378.16 km <span class="dash">/</span> Source cadence: 60 s <span class="dash">/</span> All times UTC</span></footer>
+  </main>
+
+  <dialog id="about-dialog"><div class="dialog-top"><span class="eyebrow">DATA & METHODOLOGY</span><button id="close-about" aria-label="Close data and methodology">✕</button></div><h2>A view of the archive.</h2><p>This explorer uses NASA SPDF’s SSCWeb <strong>definitive</strong> ephemerides, spacecraft IDs <code>rbspa</code> and <code>rbspb</code>. SSCWeb identifies their source as mission SPICE files supplied by Johns Hopkins APL. Predictive spacecraft IDs are never requested.</p><h3>What a point means</h3><p>Each marker is an archived Cartesian position at the sample UTC shown in its card. SSCWeb’s native cadence is 60 seconds. Exact samples are the default. The optional nearest-sample setting shows a real sample within 30 seconds and identifies its time offset; it does not calculate a position at the requested time. No marker is shown outside coverage or across a gap.</p><h3>Coordinates and scale</h3><p>SSCWeb performs the requested GEO, GSE or GSM conversion. The client divides returned kilometers by <strong>6,378.16</strong>, the Earth-radius convention in the SSCWeb user guide, and computes radial distance as √(X² + Y² + Z²). The 3D coordinates use the same right-handed axes. Earth is a spherical scale reference; its grid is schematic, not a geographic map. Marker sizes are exaggerated.</p><p id="dialog-frame-details"></p><h3>Paths, gaps and mission boundaries</h3><p>Paths are straight segments between consecutive 60-second records in the selected coordinate system. They provide sampled trajectory context, not a propagated orbit. No segment crosses a missing record. GSE and GSM axes change orientation with time, so the trail is a history in the selected frame. Fainter lines indicate future samples relative to the selected timestamp.</p><p>Operations ended for Probe B on 19 July 2019 and Probe A on 18 October 2019. Archive coverage ends earlier within those dates; an operating spacecraft may still have no ephemeris record. The controls allow the full mission date range and report each probe separately.</p><h3>Retrieval and offline use</h3><p>Initial data are genuine bundled SSCWeb responses for 16–19 March 2015 in all three coordinate systems. Other dates load on demand from SSCWeb over HTTPS, in bounded chunks. Imported datasets can extend offline coverage. A failed request is reported as a retrieval failure, not as proof of a physical data gap. The included Python downloader saves source responses and their provenance. See <a href="README.md" target="_blank" rel="noopener">README.md</a> for commands.</p><h3>Measured geomagnetic indices</h3><p id="indices-methodology">NASA OMNI provides ground-derived AE and Dst indices from WDC Kyoto. AE uses the selected minute (source timestamp at minute start). Dst uses the selected hour, tagged at its midpoint: 12:30 represents [12:00, 13:00) UTC. Both the original source timestamp and interval are shown. Missing records and fill values stay unavailable; hourly Dst is never interpolated. These global indices are independent of spacecraft availability. NASA classifies mission-era AE as provisional and Dst as final at period level; no per-record quality flag is supplied. <a href="https://omniweb.gsfc.nasa.gov/html/omni_min_data.html" target="_blank" rel="noopener">AE source and status</a> · <a href="https://omniweb.gsfc.nasa.gov/html/ow_data.html" target="_blank" rel="noopener">Dst source and status</a>.</p><ul class="source-links"><li><a href="https://sscweb.gsfc.nasa.gov/WebServices/REST/" target="_blank" rel="noopener">SSCWeb REST API and browser access ↗</a></li><li><a href="https://sscweb.gsfc.nasa.gov/sscweb_data_provenance.html" target="_blank" rel="noopener">Spacecraft data provenance ↗</a></li><li><a href="https://sscweb.gsfc.nasa.gov/users_guide/New_Users_Guide.html" target="_blank" rel="noopener">SSCWeb user guide and units ↗</a></li><li><a href="https://sscweb.gsfc.nasa.gov/users_guide/Appendix_C.shtml" target="_blank" rel="noopener">Coordinate system definitions ↗</a></li></ul><p class="small-note">A scientific archive viewer, independently built. Not an official NASA application. Decimal display precision is not a claim of orbit determination accuracy.</p></dialog>
+  <noscript><div class="fatal-error">JavaScript is required to use this visualization.</div></noscript>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
+

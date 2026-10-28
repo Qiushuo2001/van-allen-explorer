@@ -1,0 +1,56 @@
+[
+  "gov.nasa.gsfc.sscweb.schema.ObservatoryResponse",
+  {
+    "Observatory": [
+      "java.util.ArrayList",
+      [
+        [
+          "gov.nasa.gsfc.sscweb.schema.ObservatoryDescription",
+          {
+            "Id": "rbspa",
+            "Name": "RBSP-A",
+            "Resolution": 60,
+            "StartTime": [
+              "javax.xml.datatype.XMLGregorianCalendar",
+              "2012-08-30T02:25:59-07:00"
+            ],
+            "EndTime": [
+              "javax.xml.datatype.XMLGregorianCalendar",
+              "2019-10-17T18:00:00-07:00"
+            ],
+            "ResourceId": "spase://SMWG/Observatory/RBSP/A",
+            "GroupId": [
+              "java.util.ArrayList",
+              [
+                "spase://SMWG/Observatory/RBSP"
+              ]
+            ]
+          }
+        ],
+        [
+          "gov.nasa.gsfc.sscweb.schema.ObservatoryDescription",
+          {
+            "Id": "rbspb",
+            "Name": "RBSP-B",
+            "Resolution": 60,
+            "StartTime": [
+              "javax.xml.datatype.XMLGregorianCalendar",
+              "2012-08-30T02:25:59-07:00"
+            ],
+            "EndTime": [
+              "javax.xml.datatype.XMLGregorianCalendar",
+              "2019-07-18T18:00:00-07:00"
+            ],
+            "ResourceId": "spase://SMWG/Observatory/RBSP/B",
+            "GroupId": [
+              "java.util.ArrayList",
+              [
+                "spase://SMWG/Observatory/RBSP"
+              ]
+            ]
+          }
+        ]
+      ]
+    ]
+  }
+]

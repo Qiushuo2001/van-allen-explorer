@@ -1,0 +1,24 @@
+{
+  "chunks": [
+    {
+      "start": "2015-03-16T00:00:00Z",
+      "retrievedAt": "2026-10-23T15:21:23.3968669Z",
+      "end": "2015-03-19T00:00:00Z",
+      "url": "https://sscweb.gsfc.nasa.gov/WS/sscr/2/locations/rbspa,rbspb/20150316T000000Z,20150319T000000Z/gse,gsm,geo/?resolutionFactor=1",
+      "frames": [
+        "GSE",
+        "GSM",
+        "GEO"
+      ],
+      "sha256": "682823c5ab0d2ecdd0cf561e9d93e52b3fcb1101c792cb919974166fca5b1be7",
+      "file": "ssc-20150316-20150319.json"
+    }
+  ],
+  "format": "van-allen-ssc-manifest-v1",
+  "metadata": "observatories.json",
+  "metadataSource": {
+    "note": "Subset rbspa/rbspb extracted from raw authoritative metadata; timestamps normalized to UTC.",
+    "retrievedAt": "2026-10-23T15:21:01.5563840Z",
+    "url": "https://sscweb.gsfc.nasa.gov/WS/sscr/2/observatories"
+  }
+}
