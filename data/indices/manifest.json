@@ -13,20 +13,20 @@
       "parameter": "AE_INDEX"
     },
     {
-      "index": "dst",
-      "dataset": "OMNI2_H0_MRG1HR",
-      "end": "2015-03-19T00:00:00Z",
-      "url": "https://cdaweb.gsfc.nasa.gov/hapi/data?id=OMNI2_H0_MRG1HR&parameters=Time,DST1800&time.min=2015-03-16T00:00:00Z&time.max=2015-03-19T00:00:00Z&format=json&include=header",
-      "retrievedAt": "2026-10-23T16:08:14.0166937Z",
-      "sha256": "11c3ef2879b0a48dfa2326ca78360bbf42cde10e27485b0ce54c7d9d17da173c",
-      "file": "dst-20150316-20150319.json",
+      "index": "symh",
+      "dataset": "OMNI_HRO_1MIN",
+      "parameter": "SYM_H",
       "start": "2015-03-16T00:00:00Z",
-      "parameter": "DST1800"
+      "end": "2015-03-19T00:00:00Z",
+      "url": "https://cdaweb.gsfc.nasa.gov/hapi/data?id=OMNI_HRO_1MIN&parameters=Time,SYM_H&time.min=2015-03-16T00:00:00Z&time.max=2015-03-19T00:00:00Z&format=json&include=header",
+      "retrievedAt": "2026-10-28T22:26:26.993743Z",
+      "sha256": "df53842cc914ed302bd08f1544129b49342075dbe2624b1bd2cdd29716b3ac9a",
+      "file": "symh-20150316-20150319.json"
     }
   ],
   "metadata": {
     "sources": "sources.json",
     "ae": "ae-info.json",
-    "dst": "dst-info.json"
+    "symh": "symh-info.json"
   }
 }

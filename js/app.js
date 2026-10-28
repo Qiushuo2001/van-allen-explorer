@@ -1,6 +1,6 @@
 import { EphemerisStore, PROBES, MISSION_START, MISSION_END, sampleAt } from './ephemeris.js';
 import { OrbitScene } from './scene.js';
-import { GeomagneticPanels } from './index-panels.js?v=1.3.0';
+import { GeomagneticPanels } from './index-panels.js?v=1.4.0';
 import { MagneticPanels } from './magnetic-panels.js';
 
 const $ = id => document.getElementById(id);

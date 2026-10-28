@@ -1,5 +1,5 @@
 /** Native-bin index plots. Horizontal steps represent the measured bin; no interpolation. */
-import { lookupIndex } from './indices.js';
+import { lookupIndex } from './indices.js?v=1.4.0';
 
 const SVG_NS='http://www.w3.org/2000/svg';
 const MINUTE=60000,HOUR=3600000;
@@ -78,8 +78,8 @@ export function indexPlotGeometry(records,start,end,{width=800,height=210}={}) {
 
 export class IndexPlot {
   constructor({element,key,document=globalThis.document,onSeek=()=>{}}) {
-    if(!element||!['ae','dst'].includes(key)) throw new Error('IndexPlot needs an element and AE/Dst key.');
-    this.element=element;this.key=key;this.name=key==='ae'?'AE':'Dst';this.document=document;this.onSeek=onSeek;
+    if(!element||!['ae','symh'].includes(key)) throw new Error('IndexPlot needs an element and AE/SYM-H key.');
+    this.element=element;this.key=key;this.name=key==='ae'?'AE':'SYM-H';this.document=document;this.onSeek=onSeek;
     this.time=null;this.data=null;this.geometry=null;this.hoverTime=null;this.width=800;this.height=210;
     this.element.classList.add('index-plot');this.element.tabIndex=0;
     this.element.setAttribute('role','group');
@@ -138,7 +138,7 @@ export class IndexPlot {
     const g=this.geometry=indexPlotGeometry(loading||error?[]:records,start,end,{width:this.width,height:this.height});
     this.svg.setAttribute('viewBox',`0 0 ${g.width} ${g.height}`);
     this.base.replaceChildren();
-    this.description.textContent=`${this.name} native ${this.key==='ae'?'minute':'hourly'} bins on ${utc(start).slice(0,10)} UTC. Steps are constant within the source bin; gaps remain unconnected. ${g.validCount} valid bins displayed.`;
+    this.description.textContent=`${this.name} native minute bins on ${utc(start).slice(0,10)} UTC. Steps are constant within the source bin; gaps remain unconnected. ${g.validCount} valid bins displayed.`;
     const {box}=g;
     for(const gap of g.gaps) this.base.append(this.node('rect',{class:'plot-gap',x:g.x(gap.start),y:box.top,width:g.x(gap.end)-g.x(gap.start),height:box.bottom-box.top}));
     for(const value of g.domain.ticks) {
@@ -192,7 +192,7 @@ export class IndexPlot {
     if(sample) {
       this.hoverPoint.setAttribute('cx',String(x));this.hoverPoint.setAttribute('cy',String(g.y(sample.value)));
       this.inspectionValue.textContent=`${this.name} ${sample.value} nT`;
-      this.inspectionTime.textContent=`Source UTC: ${utc(sample.t)}${this.key==='dst'?' (hour midpoint)':''} · Bin [${utc(sample.start)}, ${utc(sample.end)})`;
+      this.inspectionTime.textContent=`Source UTC: ${utc(sample.t)} · Bin [${utc(sample.start)}, ${utc(sample.end)})`;
     } else {
       this.inspectionValue.textContent=this.data.loading?'Loading measurements':this.data.error?'Retrieval failed':'No measurement';
       this.inspectionTime.textContent=`At ${utc(time)} UTC · No value is interpolated or carried across a gap.`;

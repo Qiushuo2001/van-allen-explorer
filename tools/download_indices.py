@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download native AE (1 minute) and Dst (1 hour) through NASA CDAWeb HAPI.
+"""Download native AE and SYM-H (both 1 minute) through NASA CDAWeb HAPI.
 
 Python 3.10+, standard library only. --start is inclusive and --end exclusive,
 both UTC-midnight dates. Raw JSON response bytes and full parameter metadata are
@@ -21,7 +21,7 @@ from urllib.request import Request, urlopen
 
 UTC = timezone.utc
 BASE = "https://cdaweb.gsfc.nasa.gov/hapi"
-INDICES = {"ae": ("OMNI_HRO_1MIN", "AE_INDEX"), "dst": ("OMNI2_H0_MRG1HR", "DST1800")}
+INDICES = {"ae": ("OMNI_HRO_1MIN", "AE_INDEX"), "symh": ("OMNI_HRO_1MIN", "SYM_H")}
 
 
 def day(value: str) -> datetime:
@@ -63,13 +63,13 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--start", required=True, type=day, help="First UTC date, inclusive")
     parser.add_argument("--end", required=True, type=day, help="Last UTC date, exclusive")
-    parser.add_argument("--indices", default="ae,dst", help="ae,dst (default), ae, or dst")
+    parser.add_argument("--indices", default="ae,symh", help="ae,symh (default), ae, or symh")
     parser.add_argument("--output", type=Path, default=Path(__file__).resolve().parents[1] / "data" / "indices")
     parser.add_argument("--refresh", action="store_true", help="Refetch existing chunks and parameter metadata")
     args = parser.parse_args()
     indices = list(dict.fromkeys(part.strip().lower() for part in args.indices.split(",")))
     if not indices or any(key not in INDICES for key in indices):
-        parser.error("--indices must contain only ae and/or dst")
+        parser.error("--indices must contain only ae and/or symh")
     if not datetime(2012, 8, 30, tzinfo=UTC) <= args.start < args.end <= datetime(2019, 10, 19, tzinfo=UTC):
         parser.error("Use an ordered nonempty range from 2012-08-30 through exclusive 2019-10-19")
     args.output.mkdir(parents=True, exist_ok=True)

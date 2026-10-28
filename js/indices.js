@@ -10,11 +10,11 @@ export const INDEX_DEFINITIONS=Object.freeze({
     qualityLevel:'Provisional',qualityStart:Date.parse('1990-01-01T00:00Z'),qualityEnd:Date.parse('2021-01-01T00:00Z'),
     qualityURL:'https://omniweb.gsfc.nasa.gov/html/omni_min_data.html',
     timeURL:'https://cdaweb.gsfc.nasa.gov/misc/NotesO.html#OMNI_HRO_1MIN'}),
-  dst:Object.freeze({name:'Dst',dataset:'OMNI2_H0_MRG1HR',parameter:'DST1800',units:'nT',
-    cadenceMs:3600000,epochOffsetMs:1800000,epochConvention:'hour-midpoint',fill:99999,
-    qualityLevel:'Final',qualityStart:Date.parse('1963-01-01T00:00Z'),qualityEnd:Date.parse('2021-01-01T00:00Z'),
-    qualityURL:'https://omniweb.gsfc.nasa.gov/html/ow_data.html',
-    timeURL:'https://cdaweb.gsfc.nasa.gov/misc/NotesO.html#OMNI2_H0_MRG1HR'})
+  symh:Object.freeze({name:'SYM-H',dataset:'OMNI_HRO_1MIN',parameter:'SYM_H',units:'nT',
+    cadenceMs:60000,epochOffsetMs:0,epochConvention:'minute-start',fill:99999,
+    qualityLevel:'Provisional',qualityStart:Date.parse('1981-01-01T00:00Z'),qualityEnd:Date.parse('2026-10-01T00:00Z'),
+    qualityURL:'https://omniweb.gsfc.nasa.gov/html/omni_min_data.html',
+    timeURL:'https://cdaweb.gsfc.nasa.gov/misc/NotesO.html#OMNI_HRO_1MIN'})
 });
 const definition=key=>{
   if(!Object.hasOwn(INDEX_DEFINITIONS,key)) throw new Error(`Unknown index: ${key}`);
@@ -78,8 +78,8 @@ function sourceInfo(key,t,chunk={}) {
   return {dataset:d.dataset,parameter:d.parameter,kind:chunk.kind || 'unavailable',url:chunk.url || null,
     file:chunk.file || null,retrievedAt:chunk.retrievedAt || null,units:d.units,cadenceMs:d.cadenceMs,
     epochConvention:d.epochConvention,infoURL:`${HAPI_BASE}/info?id=${d.dataset}&parameters=Time,${d.parameter}`,fill:d.fill,
-    quality:{level,label:`${level} (period-level; no per-record flag)`,sourceURL:d.qualityURL,verifiedAt:'2026-10-23',
-      note:key==='dst' ? 'NASA OMNI availability documentation explicitly labels Dst through 2020 as final. HAPI retains an older parameter description ending final coverage in 2014; that stale range is not used here.' : 'NASA high-resolution OMNI availability documentation labels AE from 1990 through 2020 provisional.'}};
+    quality:{level,label:`${level} (period-level; no per-record flag)`,sourceURL:d.qualityURL,verifiedAt:'2026-10-28',
+      note:key==='symh' ? 'NASA high-resolution OMNI availability documentation labels SYM-H from 1981 through 2026-09-30 provisional. This is the native minute SYM-H index from Kyoto, not interpolated Dst.' : 'NASA high-resolution OMNI availability documentation labels AE from 1990 through 2020 provisional.'}};
 }
 
 export class GeomagneticStore {
@@ -96,7 +96,9 @@ export class GeomagneticStore {
         const manifest=await this._fetchJSON(new URL('manifest.json',this.dataBase));
         if(manifest.format!=='van-allen-indices-manifest-v1'||!Array.isArray(manifest.chunks)) throw new Error('Unrecognized index-data manifest.');
         for(const c of manifest.chunks) {
-          definition(c.index);
+          // Older local bundles can retain hourly Dst. Skip retired/unknown series
+          // so they cannot block supported AE/SYM-H chunks later in the manifest.
+          if(!Object.hasOwn(INDEX_DEFINITIONS,c.index)) continue;
           const start=Date.parse(c.start),end=Date.parse(c.end);
           if(!Number.isFinite(start)||!Number.isFinite(end)||end<=start) throw new Error('Invalid index-data chunk bounds.');
           this.chunks.push({...c,start,end,kind:'bundled',records:null});
@@ -152,12 +154,12 @@ export class GeomagneticStore {
     await this.initialize();
     if(signal?.aborted) throw new DOMException('Aborted','AbortError');
     const generation=(this.generations.get(dayStart)||0)+1;this.generations.set(dayStart,generation);
-    const result={dayStart,dayEnd,ae:[],dst:[],sources:{ae:sourceInfo('ae',t),dst:sourceInfo('dst',t)},
-      errors:{ae:null,dst:null},warnings:[...this.warnings]};
-    const outcomes=await Promise.allSettled(['ae','dst'].map(key=>this._loadIndex(key,dayStart,signal)));
+    const result={dayStart,dayEnd,ae:[],symh:[],sources:{ae:sourceInfo('ae',t),symh:sourceInfo('symh',t)},
+      errors:{ae:null,symh:null},warnings:[...this.warnings]};
+    const outcomes=await Promise.allSettled(['ae','symh'].map(key=>this._loadIndex(key,dayStart,signal)));
     if(signal?.aborted) throw new DOMException('Aborted','AbortError');
     outcomes.forEach((outcome,i)=>{
-      const key=['ae','dst'][i];
+      const key=['ae','symh'][i];
       if(outcome.status==='fulfilled') {
         result[key]=outcome.value.records;result.sources[key]=outcome.value.source;
         if(outcome.value.warning) result.warnings.push(outcome.value.warning);

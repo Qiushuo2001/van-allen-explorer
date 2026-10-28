@@ -1,6 +1,6 @@
 # Van Allen Mission Explorer
 
-A browser-based HTML/CSS/JavaScript application for the **definitive NASA SSCWeb ephemerides** of Van Allen Probe A (`rbspa`) and Probe B (`rbspb`). Includes interactive Three.js navigation, UTC time selection, mission/interval timelines, playback, configurable trajectory windows, GSE/GSM/GEO coordinates, per-probe availability, source-data import/export, and measured **AE/Dst geomagnetic index panels**.
+A browser-based HTML/CSS/JavaScript application for the **definitive NASA SSCWeb ephemerides** of Van Allen Probe A (`rbspa`) and Probe B (`rbspb`). Includes interactive Three.js navigation, UTC time selection, mission/interval timelines, playback, configurable trajectory windows, GSE/GSM/GEO coordinates, per-probe availability, source-data import/export, and measured **AE/SYM-H geomagnetic index panels**.
 
 ## Use online
 
@@ -69,28 +69,30 @@ python tools/download_magnetic.py --start 2017-09-07 --end 2017-09-10
 
 The start is inclusive and the end exclusive. Raw responses, exact XML requests, retrieval times, and SHA-256 checksums are saved under `data/magnetic/`; reload the app afterward. Completed files are reused; `--refresh` downloads them again. The spacecraft Import/Export controls do not include this separate magnetic dataset.
 
-## AE and Dst geomagnetic panels
+## AE and SYM-H geomagnetic panels
 
-The **Geomagnetic Context** plots follow the same selected UTC time, timeline, and playback controls as the spacecraft. AE and Dst are shown in two aligned plots spanning the selected UTC day, with time on the horizontal axis and nT on the vertical axis. The mint cursor follows the selected time, while compact readouts retain the exact measurement, source timestamp, and quality information.
+The **Geomagnetic Context** plots follow the same selected UTC time, timeline, and playback controls as the spacecraft. AE and SYM-H are shown in two aligned plots spanning the selected UTC day, with time on the horizontal axis and nT on the vertical axis. The mint cursor follows the selected time, while compact readouts retain the exact measurement, source timestamp, and quality information.
 
 Hover over a plot to inspect a measured bin and its original UTC timestamp. Click to move the spacecraft time to that UTC minute. With a plot focused, use Left/Right to move one minute, or Shift+Left/Right for one hour. Selecting a different day automatically loads and redraws that day's plots. The plot range is the selected UTC day, independent of the playback interval and trajectory window.
 
-Both traces show the native averaging bins as steps: one minute for AE and one hour for Dst. No smoothing, temporal interpolation, or downsampling is applied. The hourly Dst step occupies its actual hour, with the original midpoint timestamp preserved in the inspection readout. Missing/invalid bins appear as empty, shaded gaps without a connecting line. Each vertical scale is fitted to that day's valid values and includes zero. Loading or retrieval failure clears the previous day's trace immediately.
+Both traces show native one-minute bins as steps. No smoothing, temporal interpolation, or downsampling is applied. Each step occupies its source minute, with the original minute-start timestamp preserved in the inspection readout. Missing/invalid bins appear as empty, shaded gaps without a connecting line. Each vertical scale is fitted to that day's valid values and includes zero. Loading or retrieval failure clears the previous day's trace immediately.
 
 These are ground-derived, global indices from WDC for Geomagnetism, Kyoto, distributed by NASA OMNI through the CDAWeb HAPI service. They are not local measurements aboard the probes and remain available independently of spacecraft operation or ephemeris gaps. No solar-wind propagation time shift is applied to the indices.
 
 | Index | NASA dataset / parameter | Native timestamp | Selected measurement |
 |---|---|---|---|
 | AE, nT | `OMNI_HRO_1MIN` / `AE_INDEX` | Start of the one-minute bin | The minute containing the selected time. |
-| Dst, nT | `OMNI2_H0_MRG1HR` / `DST1800` | Midpoint of the one-hour bin | The hour containing the selected time. |
+| SYM-H, nT | `OMNI_HRO_1MIN` / `SYM_H` | Start of the one-minute bin | The minute containing the selected time. |
 
-For example, at **12:59:59 UTC**, AE uses the 12:59:00 source record and Dst uses the **12:30:00** source record representing **[12:00:00, 13:00:00)**. At 13:00:00, Dst switches to the source record tagged 13:30:00 for [13:00:00, 14:00:00). The bracket notation includes the start and excludes the end. A midpoint timestamp does not turn an hourly index into an instantaneous measurement. The panels show both the actual source timestamp and its corresponding interval.
+For example, at **12:59:59 UTC**, both indices use their **12:59:00** source records representing **[12:59:00, 13:00:00)**. At 13:00:00, both switch to the source records tagged 13:00:00. The bracket notation includes the start and excludes the end. The panels show both the actual source timestamp and its corresponding interval.
+
+**SYM-H replaces the hourly Dst display starting with v1.4.0.** Standard Kyoto Dst is hourly. SYM-H is a related one-minute symmetric horizontal disturbance index, derived using a different station set and a slightly different coordinate system. The app retrieves actual SYM-H measurements; it does not convert or resample hourly Dst.
 
 Values are displayed in integer nT. There is **no interpolation, nearest-bin substitution, or carry-forward across missing bins**. The spacecraft's optional nearest-sample checkbox does not affect the indices. A source fill value (`99999`), an absent record, an invalid record, and a retrieval failure all show no numerical value, with different status messages. **Refresh indices** retries failed retrievals; changing time clears stale values immediately.
 
-For the 2012–2019 mission period, NASA's current availability documentation classifies **AE as provisional** and **Dst as final**. These labels describe the archive period, not a per-record quality flag; the panels say so explicitly. The older HAPI Dst description omits the final status of 2015–2020, so the status label follows NASA's current OMNI availability table. Original HAPI metadata and the documentation links/date are retained in `data/indices/`. Source links in each card open the actual NASA query; their tooltips identify the dataset and retrieval time.
+For the 2012–2019 mission period, NASA's high-resolution OMNI availability documentation classifies **both AE and SYM-H as provisional**. These labels describe the archive period, not a per-record quality flag; the panels say so explicitly. Original HAPI metadata and the documentation links/date are retained in `data/indices/`. Source links in each card open the actual NASA query; their tooltips identify the dataset and retrieval time.
 
-Bundled index data cover **2015-03-16 00:00 UTC ≤ time < 2015-03-19 00:00 UTC**: 4,320 minute AE records and 72 hourly Dst records. Other dates load as one-day requests per index, cached in memory for up to 48 days. The app keeps missing data distinct from network errors.
+Bundled index data cover **2015-03-16 00:00 UTC ≤ time < 2015-03-19 00:00 UTC**: 4,320 one-minute records for each of AE and SYM-H. Other dates load as one-day requests per index, cached in memory for up to 48 days. The app keeps missing data distinct from network errors.
 
 To obtain more offline index data, run:
 
@@ -98,14 +100,14 @@ To obtain more offline index data, run:
 python tools/download_indices.py --start 2017-09-07 --end 2017-09-10
 ```
 
-Here `--start` is inclusive and **`--end` is exclusive**, using UTC dates. The downloader saves raw NASA responses, parameter metadata, source URLs, retrieval timestamps, and SHA-256 hashes in `data/indices/`; reload the browser afterward. Options include `--indices ae` or `--indices dst`, `--output PATH`, and `--refresh`. Requests are bounded and resumable. Newly downloaded overlapping chunks take precedence over the original example. The existing Import/Export buttons handle spacecraft ephemerides; index files are discovered through their own manifest.
+Here `--start` is inclusive and **`--end` is exclusive**, using UTC dates. The downloader saves raw NASA responses, parameter metadata, source URLs, retrieval timestamps, and SHA-256 hashes in `data/indices/`; reload the browser afterward. Options include `--indices ae` or `--indices symh`, `--output PATH`, and `--refresh`. Requests are bounded and resumable. Newly downloaded overlapping chunks take precedence over the original example. The existing Import/Export buttons handle spacecraft ephemerides; index files are discovered through their own manifest.
 
 Index sources and conventions:
 
 - [NASA CDAWeb HAPI API](https://cdaweb.gsfc.nasa.gov/hapi)
 - [CDAWeb OMNI timing conventions](https://cdaweb.gsfc.nasa.gov/misc/NotesO.html)
-- [High-resolution OMNI documentation and AE availability](https://omniweb.gsfc.nasa.gov/html/omni_min_data.html)
-- [Hourly OMNI documentation and Dst availability](https://omniweb.gsfc.nasa.gov/html/ow_data.html)
+- [High-resolution OMNI documentation and AE/SYM-H availability](https://omniweb.gsfc.nasa.gov/html/omni_min_data.html)
+- [Kyoto SYM-H definition and its distinction from hourly Dst](https://wdc.kugi.kyoto-u.ac.jp/aeasy/asy.pdf)
 
 ## Source and coordinate processing
 
@@ -182,11 +184,11 @@ vendor/THREE-LICENSE.txt        Three.js MIT license
 data/manifest.json             Local chunk index with source URLs and checksums
 data/observatories.json         Saved A/B metadata
 data/ssc-20150316-20150319.json  Authentic unmodified SSCWeb response
-data/indices/                   Raw AE/Dst samples, metadata and provenance
+data/indices/                   Raw AE/SYM-H samples, metadata and provenance
 data/magnetic/                  Raw L/MLT/MLAT responses, XML requests and provenance
 tools/serve.mjs                 Localhost-only static server, Node built-ins
 tools/download_ephemeris.py    Optional offline-data downloader
-tools/download_indices.py      Optional offline AE/Dst downloader
+tools/download_indices.py      Optional offline AE/SYM-H downloader
 tools/download_magnetic.py     Optional offline L/MLT/MLAT downloader
 tests/ephemeris.test.mjs        Data-integrity checks using the real fixture
 tests/controller.test.mjs       Playback and stale-request regression checks
@@ -205,7 +207,7 @@ Run the integrity checks with:
 npm test
 ```
 
-They check source fixture hashes, exact component conversion, timestamps, coordinate frames, radial consistency across frames, missing/null records, gap boundaries, nearest-sample restrictions, partial imports, source export/import, offline failures, stale responses, playback timing, AE minute selection, Dst midpoint/interval boundaries, fill flags, and independent index-panel updates.
+They check source fixture hashes, exact component conversion, timestamps, coordinate frames, radial consistency across frames, missing/null records, gap boundaries, nearest-sample restrictions, partial imports, source export/import, offline failures, stale responses, playback timing, AE/SYM-H minute selection and interval boundaries, fill flags, and independent index-panel updates.
 
 ## Authoritative references
 

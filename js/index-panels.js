@@ -1,7 +1,7 @@
-import { GeomagneticStore, lookupIndex } from './indices.js';
-import { IndexPlot } from './index-plot.js';
+import { GeomagneticStore, lookupIndex } from './indices.js?v=1.4.0';
+import { IndexPlot } from './index-plot.js?v=1.4.0';
 
-const MINUTE = 60000, HOUR = 3600000, DAY = 86400000;
+const MINUTE = 60000, DAY = 86400000;
 const utc = t => new Date(t).toISOString().slice(0,19).replace('T',' ');
 const dayOf = t => Math.floor(t / DAY) * DAY;
 const EMPTY_RECORDS=Object.freeze([]);
@@ -15,7 +15,7 @@ export class GeomagneticPanels {
     this.time=null; this.pendingDay=null; this.version=0; this.controller=null; this.timer=null;
     this.$=id=>document.getElementById(id);
     this.plotInputs=new Map();
-    this.plots=Object.fromEntries(['ae','dst'].map(key=>[key,plotFactory({element:this.$(`index-${key}-plot`),key,document,onSeek})]));
+    this.plots=Object.fromEntries(['ae','symh'].map(key=>[key,plotFactory({element:this.$(`index-${key}-plot`),key,document,onSeek})]));
     this.$('indices-retry').addEventListener('click',()=>{ if(this.time!==null) this.setTime(this.time,{force:true}); });
   }
 
@@ -53,7 +53,7 @@ export class GeomagneticPanels {
   render(day,{loading=false,error=null}={}) {
     const start=day?.dayStart ?? dayOf(this.time),end=day?.dayEnd ?? start+DAY;
     this.$('indices-day').textContent=`${new Date(start).toISOString().slice(0,10)} · 00:00–24:00 UTC`;
-    for(const id of ['ae','dst']) {
+    for(const id of ['ae','symh']) {
       const lookup=day ? lookupIndex(day[id],this.time) : {sample:null,status:'missing'};
       const sample=lookup.sample;
       const source=day?.sources?.[id];
@@ -66,18 +66,17 @@ export class GeomagneticPanels {
       }
       this.plots[id].setTime(this.time);
       const valid=lookup.status==='valid' && sample && !failure;
-      const duration=id==='ae' ? MINUTE : HOUR;
-      const binStart=sample?.start ?? Math.floor(this.time/duration)*duration;
-      const binEnd=sample?.end ?? binStart+duration;
-      const unit=id==='ae' ? 'Minute' : 'Hour';
+      const binStart=sample?.start ?? Math.floor(this.time/MINUTE)*MINUTE;
+      const binEnd=sample?.end ?? binStart+MINUTE;
+      const unit='Minute';
       this.$(`index-${id}-value`).textContent=valid ? String(sample.value) : '—';
       this.$(`index-${id}-state`).textContent=loading ? 'Loading measurement…' : failure ? 'Unavailable · retrieval failed' :
-        valid ? (id==='ae' ? 'Measured minute index' : 'Measured hourly index') :
+        valid ? 'Measured minute index' :
         lookup.status==='fill' ? 'Unavailable · source fill value' :
         lookup.status==='invalid' ? 'Unavailable · invalid source record' : `Unavailable · no record for this ${unit.toLowerCase()}`;
       this.$(`index-${id}-state`).title=failure || '';
       this.$(`index-${id}-state`).classList.toggle('error-text',Boolean(failure));
-      this.$(`index-${id}-time`).textContent=sample ? `Source UTC: ${utc(sample.t)}${id==='dst' ? ' (hour midpoint)' : ''}` : 'Source UTC: —';
+      this.$(`index-${id}-time`).textContent=sample ? `Source UTC: ${utc(sample.t)}` : 'Source UTC: —';
       const endText=new Date(binStart).getUTCDate()===new Date(binEnd).getUTCDate() ? utc(binEnd).slice(11) : utc(binEnd);
       this.$(`index-${id}-interval`).textContent=`${sample ? unit : 'Requested '+unit.toLowerCase()} UTC: [${utc(binStart)}, ${endText})`;
       this.$(`index-${id}-interval`).title='The interval includes its start and excludes its end. The original source timestamp is shown separately.';

@@ -8,51 +8,51 @@ const MINUTE=60000,HOUR=3600000,DAY=24*HOUR;
 const start=Date.parse('2015-03-17T00:00:00Z'),end=start+DAY;
 const load=async key=>parseIndexData(JSON.parse(await readFile(new URL(`../data/indices/${key}-20150316-20150319.json`,import.meta.url),'utf8')),key)
   .filter(record=>record.start>=start&&record.start<end);
-const ae=await load('ae'),dst=await load('dst');
+const ae=await load('ae'),symh=await load('symh');
 
-test('Real AE/Dst plots retain every source bin and include both signs and zero',()=>{
-  const a=indexPlotGeometry(ae,start,end),d=indexPlotGeometry(dst,start,end);
-  assert.equal(a.validCount,1440);assert.equal(d.validCount,24);
+test('Real AE/SYM-H plots retain every source bin and include both signs and zero',()=>{
+  const a=indexPlotGeometry(ae,start,end),d=indexPlotGeometry(symh,start,end);
+  assert.equal(a.validCount,1440);assert.equal(d.validCount,1440);
   assert.equal(a.segments.length,1);assert.equal(d.segments.length,1);
   assert.equal(a.segments[0].records.length,1440,'No downsampling removes AE peaks');
-  assert.equal(d.segments[0].records.length,24);
+  assert.equal(d.segments[0].records.length,1440,'SYM-H retains all one-minute measurements');
   assert.equal(a.gaps.length,0);assert.equal(d.gaps.length,0);
   assert.equal(a.domain.min,0);assert.ok(a.domain.max>=2298);
-  assert.ok(d.domain.min<=-234&&d.domain.max>=45,'Dst axis includes positive and negative measurements');
+  assert.ok(d.domain.min<=-234&&d.domain.max>=67,'SYM-H axis includes positive and negative measurements');
   assert.ok(d.domain.ticks.includes(0));
   assert.equal(d.xTicks.at(-1).label,'24:00','The last tick means the next midnight');
   assert.equal(indexPlotGeometry(ae,start,end,{width:320}).xTicks.length,3);
 });
 
-test('Hourly Dst paths are horizontal across their bin and vertical at the hourly boundary',()=>{
-  const records=dst.filter(s=>s.start>=start+12*HOUR&&s.start<start+14*HOUR);
-  const g=indexPlotGeometry(records,start+12*HOUR,start+14*HOUR);
-  assert.equal(records[0].value,-55);assert.equal(records[1].value,-75);
-  assert.equal(records[0].t,start+12.5*HOUR,'Original epoch is the hour midpoint');
+test('SYM-H paths change at minute boundaries using actual minute-start measurements',()=>{
+  const records=symh.filter(s=>s.start>=start+12*HOUR&&s.start<start+12*HOUR+2*MINUTE);
+  const g=indexPlotGeometry(records,start+12*HOUR,start+12*HOUR+2*MINUTE);
+  assert.equal(records[0].value,-47);assert.equal(records[1].value,-46);
+  assert.equal(records[0].t,start+12*HOUR,'Original epoch is the minute start');
   assert.equal(g.segments.length,1);
-  assert.match(g.segments[0].path,/^M[\d.,-]+H[\d.]+V[\d.-]+H[\d.]+$/,'There is no diagonal/smoothed line between hourly measurements');
-  assert.equal(indexPlotSample(records,start+12*HOUR).value,-55);
-  assert.equal(indexPlotSample(records,start+13*HOUR-1).value,-55);
-  assert.equal(indexPlotSample(records,start+13*HOUR).value,-75);
-  assert.equal(indexPlotSample(records,start+14*HOUR),null);
+  assert.match(g.segments[0].path,/^M[\d.,-]+H[\d.]+V[\d.-]+H[\d.]+$/,'There is no diagonal/smoothed line between minute measurements');
+  assert.equal(indexPlotSample(records,start+12*HOUR).value,-47);
+  assert.equal(indexPlotSample(records,start+12*HOUR+MINUTE-1).value,-47);
+  assert.equal(indexPlotSample(records,start+12*HOUR+MINUTE).value,-46);
+  assert.equal(indexPlotSample(records,start+12*HOUR+2*MINUTE),null);
 });
 
 test('Omitted, filled and invalid bins break paths and create explicit gaps',()=>{
   for(const type of ['omitted','fill','invalid']) {
-    const records=structuredClone(dst);
+    const records=structuredClone(symh);
     if(type==='omitted') records.splice(12,1);
     else Object.assign(records[12],{status:type,value:null});
     const g=indexPlotGeometry(records,start,end);
-    assert.equal(g.validCount,23);assert.equal(g.segments.length,2);
-    assert.deepEqual(g.gaps,[{start:start+12*HOUR,end:start+13*HOUR}]);
-    assert.equal(indexPlotSample(records,start+12.5*HOUR),null,'No preceding/following valid measurement fills the gap');
+    assert.equal(g.validCount,1439);assert.equal(g.segments.length,2);
+    assert.deepEqual(g.gaps,[{start:start+12*MINUTE,end:start+13*MINUTE}]);
+    assert.equal(indexPlotSample(records,start+12.5*MINUTE),null,'No preceding/following valid measurement fills the gap');
   }
-  const only=dst.slice(6,9),g=indexPlotGeometry(only,start,end);
-  assert.deepEqual(g.gaps,[{start,end:start+6*HOUR},{start:start+9*HOUR,end}]);
+  const only=symh.slice(6,9),g=indexPlotGeometry(only,start,end);
+  assert.deepEqual(g.gaps,[{start,end:start+6*MINUTE},{start:start+9*MINUTE,end}]);
 });
 
 test('Zero values remain measurements; absent/all-invalid days contain no data path',()=>{
-  const zero={...dst[0],value:0,status:'valid'};
+  const zero={...symh[0],value:0,status:'valid'};
   const g=indexPlotGeometry([zero],start,end);
   assert.equal(g.validCount,1);assert.ok(g.segments[0].path);
   assert.equal(indexPlotSample([zero],zero.start).value,0);
@@ -82,20 +82,22 @@ class FakeNode {
 }
 const document={createElement:tag=>new FakeNode(tag),createElementNS:(_ns,tag)=>new FakeNode(tag)};
 
-test('Renderer updates selected cursor without rebuilding source geometry and discloses original Dst epoch',()=>{
+test('Renderer updates selected cursor without rebuilding source geometry and discloses original SYM-H epoch',()=>{
   const element=new FakeNode(),selections=[];
-  const plot=new IndexPlot({element,key:'dst',document,onSeek:t=>selections.push(t)});
-  plot.setData({records:dst,start,end});
+  const plot=new IndexPlot({element,key:'symh',document,onSeek:t=>selections.push(t)});
+  plot.setData({records:symh,start,end});
   const geometry=plot.geometry,baseNodes=plot.base.children;
   plot.setTime(start+12*HOUR+22000);
   assert.equal(plot.geometry,geometry);assert.equal(plot.base.children,baseNodes);
   assert.equal(plot.cursorLabel.textContent,'12:00:22');
   assert.equal(plot.cursorPoint.style.display,'');
-  plot.setData({records:dst,start,end});assert.equal(plot.geometry,geometry,'Repeated identical day data are not redrawn');
+  plot.setData({records:symh,start,end});assert.equal(plot.geometry,geometry,'Repeated identical day data are not redrawn');
   plot.inspect(start+12*HOUR+22*MINUTE);
-  assert.equal(plot.inspectionValue.textContent,'Dst -55 nT');
-  assert.match(plot.inspectionTime.textContent,/Source UTC: 2015-03-17 12:30:00 \(hour midpoint\)/);
-  assert.match(plot.inspectionTime.textContent,/Bin \[2015-03-17 12:00:00, 2015-03-17 13:00:00\)/);
+  assert.equal(plot.inspectionValue.textContent,'SYM-H -48 nT');
+  assert.match(plot.inspectionTime.textContent,/Source UTC: 2015-03-17 12:22:00/);
+  assert.match(plot.inspectionTime.textContent,/Bin \[2015-03-17 12:22:00, 2015-03-17 12:23:00\)/);
+  assert.doesNotMatch(plot.inspectionTime.textContent,/hour midpoint/);
+  assert.match(plot.description.textContent,/SYM-H native minute bins/);
   plot.clearInspection();assert.match(plot.inspectionValue.textContent,/Hover to inspect/);
   let prevented=false;
   plot.keydown({key:'ArrowRight',shiftKey:true,preventDefault(){prevented=true;}});

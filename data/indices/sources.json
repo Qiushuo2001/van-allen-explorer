@@ -1,5 +1,5 @@
 {
-  "verifiedAt": "2026-10-23",
+  "verifiedAt": "2026-10-28",
   "provider": "NASA Space Physics Data Facility, CDAWeb HAPI, OMNI",
   "originator": "World Data Center for Geomagnetism, Kyoto",
   "api": "https://cdaweb.gsfc.nasa.gov/hapi",
@@ -19,24 +19,27 @@
     "qualityDocumentation": "https://omniweb.gsfc.nasa.gov/html/omni_min_data.html",
     "qualitySection": "1a. Data availability"
   },
-  "dst": {
-    "dataset": "OMNI2_H0_MRG1HR",
-    "parameter": "DST1800",
-    "infoURL": "https://cdaweb.gsfc.nasa.gov/hapi/info?id=OMNI2_H0_MRG1HR&parameters=Time,DST1800",
-    "units": "nT",
-    "cadenceSeconds": 3600,
-    "fill": 99999,
-    "epoch": "Midpoint of the one-hour bin. For example, the unmodified 12:30 UTC source epoch denotes the [12:00,13:00) UTC hourly bin.",
-    "timeDocumentation": "https://cdaweb.gsfc.nasa.gov/misc/NotesO.html#OMNI2_H0_MRG1HR",
-    "quality": "Final",
-    "qualityPeriod": "1963-01-01 through 2020-12-31",
-    "qualityScope": "Period-level documentation. No per-record quality flag accompanies this HAPI parameter.",
-    "qualityDocumentation": "https://omniweb.gsfc.nasa.gov/html/ow_data.html",
-    "qualitySection": "2. Data availability",
-    "metadataDiscrepancy": "The HAPI parameter description still lists a 2014 final-data endpoint and then provisional data from 2021, leaving 2015-2020 undescribed. NASA's current OMNI availability documentation explicitly labels the full period through 2020 final; the application uses that documented period and does not infer status from the dataset title. The original HAPI description is preserved in dst-info.json and raw responses."
-  },
   "selection": "Select only the source record whose documented averaging interval contains the selected UTC timestamp. The application never interpolates index values or uses the nearest available record to bridge a gap.",
   "missing": "A source fill value remains an explicit missing-value record; an absent record is separately identified; an HTTP/service/parse failure is reported as a load error.",
   "boundary": "HAPI time.max is exclusive. Bundled sample covers 2015-03-16T00:00:00Z <= selected time < 2015-03-19T00:00:00Z.",
-  "sampleCounts": {"ae": 4320, "dst": 72}
+  "sampleCounts": {
+    "ae": 4320,
+    "symh": 4320
+  },
+  "symh": {
+    "dataset": "OMNI_HRO_1MIN",
+    "parameter": "SYM_H",
+    "infoURL": "https://cdaweb.gsfc.nasa.gov/hapi/info?id=OMNI_HRO_1MIN&parameters=Time,SYM_H",
+    "units": "nT",
+    "cadenceSeconds": 60,
+    "fill": 99999,
+    "epoch": "Start of the one-minute bin; native sourceTime is retained.",
+    "timeDocumentation": "https://cdaweb.gsfc.nasa.gov/misc/NotesO.html#OMNI_HRO_1MIN",
+    "quality": "Provisional",
+    "qualityPeriod": "1981-01-01 through 2026-09-30",
+    "qualityScope": "Period-level documentation. No per-record quality flag accompanies this HAPI parameter.",
+    "qualityDocumentation": "https://omniweb.gsfc.nasa.gov/html/omni_min_data.html",
+    "qualitySection": "1a. Data availability",
+    "interpretation": "Native 1-minute SYM-H from Kyoto; related to, but a distinct index from, standard hourly Dst. The application does not derive it by interpolating Dst."
+  }
 }

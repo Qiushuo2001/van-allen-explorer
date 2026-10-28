@@ -19,7 +19,7 @@
 .plot-gap-key{display:inline-block;width:12px;height:10px;background:#71849a25;border:1px solid #71849a66}
 .indices-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
 .index-card{--index-accent:#c8b4ed;--index-border:#443a5a;min-width:0;padding:15px 17px 12px;background:linear-gradient(115deg,#191f30,#101b29);border:1px solid var(--index-border);border-radius:8px}
-.index-dst{--index-accent:#dba4b4;--index-border:#513e4c;background:linear-gradient(115deg,#231f2c,#121b28)}
+.index-symh{--index-accent:#dba4b4;--index-border:#513e4c;background:linear-gradient(115deg,#231f2c,#121b28)}
 .index-plot-header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:5px}
 .index-card-heading{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
 .index-card-heading h2{font-size:16px;font-weight:650;color:var(--index-accent)}
