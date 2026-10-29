@@ -1,7 +1,7 @@
 import { EphemerisStore, PROBES, MISSION_START, MISSION_END, sampleAt } from './ephemeris.js';
 import { OrbitScene } from './scene.js';
 import { GeomagneticPanels } from './index-panels.js?v=1.4.0';
-import { MagneticPanels } from './magnetic-panels.js';
+import { MagneticPanels } from './magnetic-panels.js?v=1.4.1';
 
 const $ = id => document.getElementById(id);
 const HOUR = 3600000, DAY = 24 * HOUR, MINUTE = 60000;

@@ -43,8 +43,11 @@ export class MagneticPanels {
       const sample=lookup?.exact&&!failure ? lookup.sample : null;
       for(const key of ['l','mlt','mlat']) {
         const value=sample?.[key];
-        this.$(`${key}-${p.id}`).textContent=Number.isFinite(value) ?
+        const formatted=Number.isFinite(value) ?
           (key==='mlt'?(Math.round(value*1000)/1000)%24:value).toFixed(key==='mlat'?2:3) : '—';
+        // The scene and inspector share the same source sample and formatting.
+        this.$(`${key}-${p.id}`).textContent=formatted;
+        this.$(`scene-${key}-${p.id}`).textContent=formatted;
       }
       const status=this.$(`magnetic-status-${p.id}`),source=day?.source;
       status.textContent=!Number.isFinite(target) ? 'No position sample selected' : loading ? 'Loading magnetic coordinates…' :
@@ -55,6 +58,7 @@ export class MagneticPanels {
       this.$(`magnetic-time-${p.id}`).textContent=sample ? `Magnetic UTC: ${utc(sample.t)}` : 'Magnetic UTC: —';
       const model=this.$(`magnetic-model-${p.id}`);model.href=MAGNETIC_DOC;
       model.title='L: SSCWeb centered-dipole L-value. MLT: Solar Magnetic local time in hours. MLAT: spacecraft latitude in SM, in degrees.';
+      this.$(`scene-magnetic-${p.id}`).title=`${status.textContent}\n${this.$(`magnetic-time-${p.id}`).textContent}\n${model.title}${failure ? '\n'+failure : ''}`;
     }
     this.$('magnetic-retry').disabled=loading||this.day===null;
   }

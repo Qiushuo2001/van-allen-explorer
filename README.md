@@ -36,7 +36,7 @@ The included NASA dataset covers **2015-03-16 00:00:00 through 2015-03-19 00:00:
 - **Play starts from the selected time**, advancing to the next UTC minute if necessary. If that time is outside the current playback interval, the interval moves to start at your selection, keeps its previous duration, and is shortened at the mission end. The From/To fields and timeline update together. Playback never returns to the bundled example because a requested date has not been downloaded; it retrieves that date or reports unavailable data.
 - Rotate with left-drag, zoom with the wheel/pinch, and pan with right-drag. **3D / XY / XZ** choose views; **↺** resets the camera. Each probe has an independent visibility toggle.
 - Select GSE, GSM or GEO and a trajectory half-window from ±1 to ±24 hours. Solid paths are past records, dashed paths future records relative to the selected time.
-- Each probe also shows **L, MLT, and MLAT**, matched to its plotted position sample. The magnetic values use SSCWeb's centered-dipole/SM convention regardless of the Cartesian frame selected for the 3D view.
+- Each probe also shows **L, MLT, and MLAT** directly below the orbital-view heading and in its inspector card, matched to its plotted position sample. The cyan Probe A and amber Probe B labels update with time selection and playback; missing values display an em dash. The magnetic values use SSCWeb's centered-dipole/SM convention regardless of the Cartesian frame selected for the 3D view.
 - **Export** saves loaded raw responses with provenance. **Import data** accepts that bundle, the downloader’s bundle, or raw SSCWeb JSON responses. Imports remain in memory until reload; put permanent downloads in `data/` using the downloader.
 
 ## Temporal accuracy and gaps

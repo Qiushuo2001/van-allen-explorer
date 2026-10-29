@@ -64,3 +64,17 @@
 .magnetic-coordinates{margin:10px 0 6px}.magnetic-coordinates dd{font-size:17px}.magnetic-coordinates dt small{font-size:9px;letter-spacing:0;color:var(--muted)}
 .magnetic-status{font-size:9px;color:var(--muted);line-height:1.5;overflow-wrap:anywhere}
 .magnetic-note{margin:12px 0;color:var(--muted);font-size:10px;line-height:1.6}.magnetic-note button{font-size:10px;margin-top:3px}
+
+/* Compact magnetic readouts beneath the orbital-view heading. */
+.scene-heading{max-width:calc(100% - 52px)}
+.scene-magnetic{display:grid;gap:5px;width:max-content;max-width:100%;margin-top:14px}
+.scene-magnetic-row{display:grid;grid-template-columns:62px 60px 93px 97px;align-items:center;gap:10px;padding:6px 9px;border-left:2px solid var(--cyan);border-radius:3px;background:#0b1724d9;font:11px var(--mono);pointer-events:auto}
+.scene-magnetic-b{border-left-color:var(--amber)}
+.scene-magnetic-probe{display:flex;align-items:center;gap:6px;font:600 11px var(--font);color:var(--cyan);white-space:nowrap}
+.scene-magnetic-b .scene-magnetic-probe{color:var(--amber)}
+.scene-magnetic-field{display:flex;align-items:baseline;gap:5px;white-space:nowrap;color:#9bafc3}
+.scene-magnetic-field strong{font-weight:500;color:var(--text);font-variant-numeric:tabular-nums}
+.scene-magnetic-field small{font-size:9px;margin-left:-3px;color:#9bafc3}
+.scene-magnetic-convention{font:9px/1.5 var(--mono);color:#91a5bb;padding-left:11px}
+@media(max-width:1120px){.scene-magnetic-row{grid-template-columns:55px 53px 82px 88px;gap:7px;font-size:10px}.scene-magnetic-probe{font-size:10px}}
+@media(max-width:520px){.scene-heading{max-width:calc(100% - 32px)}.scene-magnetic{margin-top:12px}.scene-magnetic-row{grid-template-columns:48px 42px 68px 72px;gap:5px;padding:6px}.scene-magnetic-probe{font-size:9px;gap:4px}.scene-magnetic-field{gap:3px;font-size:9px}.scene-magnetic-field small{font-size:8px;margin-left:-1px}.scene-magnetic-convention{font-size:8px;padding-left:8px}}
