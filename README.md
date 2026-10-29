@@ -1,6 +1,6 @@
 # Van Allen Mission Explorer
 
-A browser-based HTML/CSS/JavaScript application for the **definitive NASA SSCWeb ephemerides** of Van Allen Probe A (`rbspa`) and Probe B (`rbspb`). Includes interactive Three.js navigation, UTC time selection, mission/interval timelines, playback, configurable trajectory windows, GSE/GSM/GEO coordinates, per-probe availability, source-data import/export, and measured **AE/SYM-H geomagnetic index panels**.
+A browser-based HTML/CSS/JavaScript application for the **definitive NASA SSCWeb ephemerides** of Van Allen Probe A (`rbspa`) and Probe B (`rbspb`). Includes interactive Three.js navigation, UTC time selection, mission/interval timelines, playback, configurable trajectory windows, GSE/GSM/GEO coordinates, per-probe availability, source-data import/export, measured **AE/SYM-H geomagnetic index panels**, and per-probe **electron plasma conditions**.
 
 ## Use online
 
@@ -109,6 +109,49 @@ Index sources and conventions:
 - [High-resolution OMNI documentation and AE/SYM-H availability](https://omniweb.gsfc.nasa.gov/html/omni_min_data.html)
 - [Kyoto SYM-H definition and its distinction from hourly Dst](https://wdc.kugi.kyoto-u.ac.jp/aeasy/asy.pdf)
 
+## Local electron plasma conditions
+
+Two **Local Electron Plasma** cards follow selected UTC and playback independently of ephemeris availability. Each probe displays electron density in cm⁻³, archived f_pe/f_ce, electron temperature anisotropy T⊥/T∥, and scalar electron beta. The selected timestamp, actual native source timestamps, time offsets, per-field missing states, and source query links remain visible. **Refresh plasma** retries retrievals.
+
+| Quantity | Data and definition |
+|---|---|
+| Electron density n_e | Native EMFISIS L4 `density`, total electron density inferred from wave observations. |
+| f_pe/f_ce | Native EMFISIS L4 `wpe_over_wce`. Angular-frequency and ordinary-frequency ratios are identical; the archived value is displayed directly. |
+| Electron anisotropy | `Tperp_e_200 / Tpar_e_200` from the same HOPE electron-moment record. Isotropy is 1; this is not the alternative ratio-minus-one convention. |
+| Scalar β_e | `2 μ0 n_HOPE e (Tpar + 2 Tperp) / (3 B²)`, using the same HOPE record's partial density and temperatures, and measured EMFISIS magnetic magnitude matched to the HOPE epoch. |
+
+**The HOPE anisotropy and beta describe a partial electron population ≥200 eV, in apogee mode, up to the instrument's approximately 50 keV upper range.** They are not total-plasma or ion beta. HOPE partial moments are not corrected for spacecraft potential. The calculation uses HOPE density with HOPE temperatures; total EMFISIS density is not substituted into the hot-electron pressure. Temperatures are in eV, density converts from cm⁻³ to m⁻³, and magnetic magnitude from nT to T. Derived quantities are identified as such; spacecraft magnetic model fields are never used for beta.
+
+The native NASA CDAWeb HAPI sources are:
+
+| Product | Probe A dataset | Probe B dataset | Parameters |
+|---|---|---|---|
+| EMFISIS L4 density | `RBSP-A_DENSITY_EMFISIS-L4` | `RBSP-B_DENSITY_EMFISIS-L4` | `density`, `wpe_over_wce` (with native `bmag`, `fpe`, `fce` retained) |
+| HOPE release04 L3 electron moments | `RBSPA_REL04_ECT-HOPE-MOM-L3@1` | `RBSPB_REL04_ECT-HOPE-MOM-L3@1` | `Tpar_e_200`, `Tperp_e_200`, `Dens_e_200`, `e_T_flag`, `e_Tperp_flag`, `e_Dens_flag` |
+| EMFISIS L3 measured magnetic field | `RBSP-A_MAGNETOMETER_4SEC-GSE_EMFISIS-L3` | `RBSP-B_MAGNETOMETER_4SEC-GSE_EMFISIS-L3` | `Magnitude`, `calState`, `magInvalid`, `magFill` |
+
+The `@1` HAPI product selects the native electron epochs, rather than the separate ion epochs. HAPI units and parameter names are validated. Nonfinite, nonphysical, and source fill values are rejected. HOPE temperature flags must both be zero for anisotropy; beta additionally requires the density flag to be zero. All three magnetic flags must be zero. EMFISIS L4 does not expose a per-record quality flag through this product; no final/provisional certification is invented.
+
+The instruments have different cadences and often do not sample at an ephemeris minute. The app uses **conservative nearest-native-sample matching, without interpolation**:
+
+- Density / ratio: absolute offset ≤3.5 s, bracket separation ≤7.01 s.
+- HOPE: absolute offset ≤12.5 s, bracket separation ≤25 s.
+- Magnetic field: absolute offset ≤2.01 s from the selected HOPE epoch, bracket separation ≤4.01 s. Both HOPE and magnetic source UTCs are shown for beta.
+
+An exact source timestamp can be used directly. Otherwise both surrounding source records must exist and satisfy the separation limit; there is no extrapolation. Selection considers all rows before checking values and quality flags, so a missing or flagged nearest sample is never skipped to obtain a more distant good value. These limits are explicit app selection rules, **not claims of native averaging intervals**. The density product has irregular epochs, and the HOPE product does not provide usable integration bounds through HAPI. Gaps remain unavailable even if a wider search would find measurements. Requests include 30 s of padding at each UTC-day edge to apply the same rule across midnight.
+
+Source coverage differs from spacecraft operations and from the other instruments. In particular, the default March17,2015 noon selection contains missing Probe A density and HOPE data; unavailable output there is a real archive limitation. Probe B has usable records near that selection. A failure fetching one product or probe does not erase independent available quantities, and playback never waits on plasma data or changes the selected time.
+
+Raw responses for **March16–18,2015**, with boundary padding, are bundled under `data/plasma/`. Additional dates load on demand in daily requests and are cached in memory for up to 24 days. For offline use:
+
+```sh
+python tools/download_plasma.py --start 2017-09-07 --end 2017-09-10
+```
+
+The start date is inclusive and the end exclusive. The standard-library downloader saves unmodified NASA responses, parameter metadata, URLs, retrieval UTCs, and SHA-256 hashes. Use `--output PATH` for a separate directory or `--refresh` to retrieve existing files again. Reload after downloading. Plasma uses its own manifest; the spacecraft Import/Export controls do not include these datasets.
+
+Sources: [CDAWeb EMFISIS and HOPE notes](https://cdaweb.gsfc.nasa.gov/misc/NotesR.html), [HOPE electron moment description](https://spase-metadata.org/NASA/NumericalData/RBSP/B/ECT/HOPE/L3/Moments/Release04/PT24.35S), and [NASA CDAWeb HAPI](https://cdaweb.gsfc.nasa.gov/hapi).
+
 ## Source and coordinate processing
 
 1. Request SSCWeb spacecraft IDs **`rbspa,rbspb`** with `resolutionFactor=1`. The separately listed predictive products `rbspapred` and `rbspbpred` are excluded. NASA identifies the definitive source as SPICE files from Johns Hopkins APL.
@@ -178,6 +221,8 @@ js/index-panels.js              Index display and independent loading state
 js/index-plot.js                SVG time-series plots and UTC interaction
 js/magnetic.js                  SSCWeb magnetic-data retrieval and validation
 js/magnetic-panels.js           L/MLT/MLAT display matched to plotted sample UTC
+js/plasma.js                    Plasma retrieval, quality checks, time matching and derivation
+js/plasma-panels.js             Per-probe electron plasma readouts and independent loading
 vendor/three.module.js          Three.js 0.170.0 (included)
 vendor/OrbitControls.js         Matching controls; import changed to local module
 vendor/THREE-LICENSE.txt        Three.js MIT license
@@ -186,10 +231,12 @@ data/observatories.json         Saved A/B metadata
 data/ssc-20150316-20150319.json  Authentic unmodified SSCWeb response
 data/indices/                   Raw AE/SYM-H samples, metadata and provenance
 data/magnetic/                  Raw L/MLT/MLAT responses, XML requests and provenance
+data/plasma/                    Raw EMFISIS/HOPE responses, metadata and provenance
 tools/serve.mjs                 Localhost-only static server, Node built-ins
 tools/download_ephemeris.py    Optional offline-data downloader
 tools/download_indices.py      Optional offline AE/SYM-H downloader
 tools/download_magnetic.py     Optional offline L/MLT/MLAT downloader
+tools/download_plasma.py       Optional offline electron-plasma downloader
 tests/ephemeris.test.mjs        Data-integrity checks using the real fixture
 tests/controller.test.mjs       Playback and stale-request regression checks
 tests/indices.test.mjs          Native index epochs, bins, fill values and caching
@@ -197,6 +244,8 @@ tests/index-panels.test.mjs     Timestamp display and concurrent-selection check
 tests/index-plot.test.mjs       Native-bin geometry, gaps, UTC axes and interaction
 tests/magnetic.test.mjs         Authentic magnetic values, source hashes and retrieval
 tests/magnetic-panels.test.mjs  Position/magnetic sample alignment and gap handling
+tests/plasma.test.mjs           Real source values, quality, timing and derived physics
+tests/plasma-panels.test.mjs    Plasma display, source times and stale-request handling
 ```
 
 Three.js and OrbitControls were obtained from the public `three@0.170.0` package via jsDelivr and are bundled with their license. No runtime CDN, font service, image service, analytics, or framework dependency is used. Uncached ephemerides and indices require a network request to NASA SSCWeb or CDAWeb. Live ephemerides are cached in memory (up to 48 daily chunks); Export preserves them across sessions. Metadata limits are deliberately pinned to the accompanying snapshot rather than silently adopting new mission coverage.

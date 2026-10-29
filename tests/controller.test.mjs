@@ -34,7 +34,9 @@ function harness() {
   class FakeScene {setFrame(){}setData(){}setVisibility(){}setView(){}resetView(){}dispose(){}}
   class FakeIndices {setTime(){}dispose(){}}
   class FakeMagnetic {setSelection(){}dispose(){}}
-  const context={PROBES,MISSION_START,MISSION_END,sampleAt,EphemerisStore:FakeStore,OrbitScene:FakeScene,GeomagneticPanels:FakeIndices,MagneticPanels:FakeMagnetic,
+  const plasmaTimes=[];
+  class FakePlasma {setTime(t){plasmaTimes.push(t);}dispose(){}}
+  const context={PROBES,MISSION_START,MISSION_END,sampleAt,EphemerisStore:FakeStore,OrbitScene:FakeScene,GeomagneticPanels:FakeIndices,MagneticPanels:FakeMagnetic,PlasmaPanels:FakePlasma,
     document:{getElementById:get,querySelectorAll:()=>[],createTextNode:text=>({text}),createElement:()=>element(),addEventListener(){}},
     window:{addEventListener(){}},performance,AbortController,setTimeout(){return 1;},clearTimeout(){},requestAnimationFrame(){},console,
   };
@@ -49,7 +51,7 @@ function harness() {
     else request.resolve(dataFor(request.start,request.end,errors));
     await Promise.resolve(); await Promise.resolve();
   };
-  return {state,loadData,seek,animate,get,store,click,pick,settle};
+  return {state,loadData,seek,animate,get,store,click,pick,settle,plasmaTimes};
 }
 
 test('Returning to retained data aborts a stale request and rejects its late completion',async()=>{
@@ -70,6 +72,7 @@ test('Picker seconds remain synchronized; slider gestures snap to an archived mi
   h.pick(initialTime+22000);
   assert.equal(h.get('timeline').value,String((initialTime+22000)/1000));
   assert.equal(h.get('timeline').step,'1');
+  assert.equal(h.plasmaTimes.at(-1),initialTime+22000,'Plasma receives selected UTC seconds independently of orbit availability');
   h.get('timeline').value=String((initialTime+38000)/1000);
   h.get('timeline').listeners.input({target:h.get('timeline')});
   assert.equal(h.state.time,initialTime+MINUTE);
@@ -99,6 +102,7 @@ for(const date of ['2013-06-12T09:20:00Z','2018-08-01T12:00:00Z']) {
     assert.equal(h.state.loading,false);
     for(const now of [1500,1750,2000,2250]) h.animate(now);
     assert.equal(h.state.time,selected+MINUTE,'Playback advances at the selected date');
+    assert.equal(h.plasmaTimes.at(-1),selected+MINUTE,'Plasma follows playback rather than retaining the bundled day');
   });
 }
 
