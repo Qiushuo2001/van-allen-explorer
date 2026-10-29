@@ -79,34 +79,54 @@
 @media(max-width:1120px){.scene-magnetic-row{grid-template-columns:55px 53px 82px 88px;gap:7px;font-size:10px}.scene-magnetic-probe{font-size:10px}}
 @media(max-width:520px){.scene-heading{max-width:calc(100% - 32px)}.scene-magnetic{margin-top:12px}.scene-magnetic-row{grid-template-columns:48px 42px 68px 72px;gap:5px;padding:6px}.scene-magnetic-probe{font-size:9px;gap:4px}.scene-magnetic-field{gap:3px;font-size:9px}.scene-magnetic-field small{font-size:8px;margin-left:-1px}.scene-magnetic-convention{font-size:8px;padding-left:8px}}
 
-/* Local electron measurements and energy-limited HOPE moments. */
+/* Native electron-plasma time series, with a shared UTC axis for both probes. */
 .plasma-section{border-top:1px solid var(--line);background:var(--panel-deep);padding:18px 26px}
 .plasma-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
 .plasma-heading>div{display:flex;flex-wrap:wrap;align-items:center;gap:5px 14px}
 .plasma-heading .text-button{font-size:10px;flex-shrink:0}
-.plasma-time{font:10px var(--mono);color:#b6c6d8}
-.plasma-summary{font-size:10px;line-height:1.6;color:#9aadc2;margin:8px 0 13px;max-width:760px}
-.plasma-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-.plasma-card{--plasma-accent:var(--cyan);border:1px solid #2e4659;border-top:2px solid var(--plasma-accent);border-radius:7px;padding:14px;background:linear-gradient(120deg,#112536,#0d1725);min-width:0}
-.plasma-card-b{--plasma-accent:var(--amber);border-color:#4a443c;border-top-color:var(--plasma-accent);background:linear-gradient(120deg,#24232a,#111a27)}
-.plasma-card-heading{display:flex;justify-content:space-between;gap:10px;align-items:center}
-.plasma-card-heading h2{display:flex;align-items:center;gap:7px;color:var(--plasma-accent);font-size:13px;font-weight:600}
-.plasma-card-heading>span{font:8px var(--mono);color:#91a5b8;letter-spacing:.4px}
+.plasma-day{font:11px var(--mono);color:#b6c6d8}
+.plasma-time{font:9px var(--mono);color:#92a7bd;flex-basis:100%}
+.plasma-summary{font-size:10px;line-height:1.6;color:#9aadc2;margin:8px 0 13px;max-width:800px}
+.plasma-legend{margin-top:12px}
+.plasma-line-key{display:inline-block;width:18px;border-top:2px solid;vertical-align:middle}
+.plasma-key-a{color:var(--cyan)}.plasma-key-b{color:var(--amber)}
+.plasma-charts{display:grid;gap:16px}
+.plasma-chart{border:1px solid #304052;border-radius:7px;padding:14px;background:linear-gradient(115deg,#132334,#101a28);min-width:0}
+.plasma-chart-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px 18px;flex-wrap:wrap;margin-bottom:8px}
+.plasma-chart-header h2{font-size:15px;font-weight:600;color:#dfebf5}
+.plasma-chart-header>div>p{font-size:10px;color:#9bafc4;margin-top:3px}
+.plasma-selected-values{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:4px 18px}
+.plasma-selected{display:flex;align-items:baseline;gap:6px;color:var(--plasma-accent)}
+.plasma-selected-a{--plasma-accent:var(--cyan)}.plasma-selected-b{--plasma-accent:var(--amber)}
+.plasma-selected>span{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--plasma-accent)}
+.plasma-selected>strong{font:500 18px var(--mono);font-variant-numeric:tabular-nums}
+.plasma-selected>small{font:9px var(--mono);color:#a6b6c7}
+.plasma-chart-notes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;border-top:1px solid #304052;padding-top:8px;margin-top:6px}
+.plasma-selected-note>span{font:10px var(--mono);color:var(--plasma-accent)}
+.plasma-selected-note>p{font:9px/1.6 var(--mono);color:#98adc2;overflow-wrap:anywhere;min-height:29px;margin-top:2px}
+.plasma-plot{position:relative;min-width:0;border-radius:4px}
+.plasma-plot:focus-visible{outline:2px solid var(--mint);outline-offset:4px}
+.plasma-plot-svg{display:block;overflow:hidden;touch-action:pan-y;cursor:crosshair}
+.plasma-trace{fill:none;stroke-width:1.25;stroke-linejoin:round}
+.pl-probe-a{color:var(--cyan)}.pl-probe-b{color:var(--amber)}
+.plasma-trace.pl-probe-a{stroke:var(--cyan)}.plasma-trace.pl-probe-b{stroke:var(--amber)}
+.plasma-isolated{stroke-width:3;stroke-linecap:round}
+.plasma-point{stroke:#0c1726;stroke-width:1}
+.plasma-point.pl-probe-a{fill:var(--cyan)}.plasma-point.pl-probe-b{fill:var(--amber)}
+.plasma-plot-status{display:flex;flex-wrap:wrap;gap:3px 16px;font:9px/1.5 var(--mono);color:#99abc0;margin-top:3px}
+.plasma-plot-inspection{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px;margin-top:7px}
+.plasma-plot-inspection-row{display:flex;flex-direction:column;gap:3px;min-width:0;min-height:50px}
+.plasma-inspection-value{font:11px var(--mono);font-weight:500}
+.plasma-inspection-time{font:9px/1.5 var(--mono);color:#9caec2;overflow-wrap:anywhere}
+.plasma-plot-hint{font-size:9px;color:#8098b1;margin-top:5px}
 .plasma-status{font-size:9px;color:#97aabe;line-height:1.6;margin-top:4px;min-height:15px}
-.plasma-values{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:12px 0;gap:14px 12px}
-.plasma-field{min-width:0}
-.plasma-field dt>span{font:13px var(--mono);color:#c2d4e5}
-.plasma-field dt>small{display:block;font-size:9px;color:#93a7bc;margin-top:2px}
-.plasma-field dd:not(.plasma-field-note){display:flex;align-items:baseline;gap:6px;margin:5px 0;color:var(--plasma-accent);font:21px var(--mono)}
-.plasma-field dd strong{font-weight:500;font-variant-numeric:tabular-nums}
-.plasma-field dd>span{font:10px var(--mono);color:#9bb0c3}
-.plasma-field-note{margin:0;font:9px/1.6 var(--mono);color:#9aadc1;overflow-wrap:anywhere;white-space:pre-line}
-.plasma-source-links{display:flex;flex-wrap:wrap;gap:5px 13px;border-top:1px solid #344353;padding-top:9px;font-size:9px}
+.plasma-source-links{display:flex;flex-wrap:wrap;gap:5px 13px;padding-top:6px;font-size:9px}
 .plasma-source-links a{color:var(--plasma-accent);text-underline-offset:2px;text-decoration-color:#50677b}
 .plasma-methods{margin-top:12px;color:#92a7bd;font-size:10px;line-height:1.7}
 .plasma-methods summary{cursor:pointer;color:#b5c8da;width:fit-content}
 .plasma-methods summary:focus-visible{outline:2px solid var(--mint);outline-offset:3px}
 .plasma-methods p{margin-top:7px;max-width:900px}
-@media(min-width:851px) and (max-width:1120px){.plasma-grid{grid-template-columns:1fr}.plasma-values{grid-template-columns:repeat(4,minmax(0,1fr))}.plasma-field dd:not(.plasma-field-note){font-size:18px}}
-@media(max-width:1120px){.plasma-section{padding:16px 18px}}
-@media(max-width:600px){.plasma-section{padding:16px 14px}.plasma-grid{grid-template-columns:1fr}.plasma-heading>div{flex-direction:column;align-items:flex-start}.plasma-card{padding:12px}.plasma-field dd:not(.plasma-field-note){font-size:22px}}
+.plasma-provenance-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px}
+.plasma-provenance h3{display:flex;align-items:center;gap:6px;color:var(--plasma-accent);font-size:11px;font-weight:500}
+@media(max-width:1120px){.plasma-section{padding:16px 18px}.plasma-chart{padding:13px}}
+@media(max-width:600px){.plasma-section{padding:16px 14px}.plasma-heading>div{flex-direction:column;align-items:flex-start}.plasma-chart{padding:12px 10px}.plasma-chart-header{gap:7px}.plasma-chart-header>div{width:100%}.plasma-selected-values{justify-content:flex-start;gap:5px 15px}.plasma-selected>strong{font-size:16px}.plasma-chart-notes,.plasma-plot-inspection,.plasma-provenance-grid{grid-template-columns:1fr;gap:6px}.plasma-selected-note>p{min-height:0}.plasma-plot-inspection-row{min-height:34px}}

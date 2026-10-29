@@ -1,8 +1,13 @@
-import { PlasmaStore, selectPlasma } from './plasma.js';
+import { PlasmaStore, selectPlasma } from './plasma.js?v=1.6.0';
+import { buildPlasmaSeries } from './plasma-series.js?v=1.6.0';
+import { PlasmaPlot } from './plasma-plot.js?v=1.6.0';
 import { PROBES } from './ephemeris.js';
 
 const DAY=86400000,dayOf=t=>Math.floor(t/DAY)*DAY;
 const KEYS=['density','ratio','anisotropy','beta'];
+const EMPTY_RECORDS=Object.freeze([]);
+const EMPTY_SERIES=Object.freeze({rbspa:EMPTY_RECORDS,rbspb:EMPTY_RECORDS});
+const DEPENDENCIES={density:['density'],ratio:['density'],anisotropy:['moments'],beta:['moments','field']};
 const SOURCE_LABELS={density:'EMFISIS density',moments:'HOPE electron moments',field:'EMFISIS magnetic field'};
 const SOURCE_KINDS={bundled:'Bundled NASA response',live:'Live NASA response',unavailable:'No response loaded'};
 const utc=value=>typeof value==='string' ? value.replace('T',' ').replace(/Z$/,' UTC') : new Date(value).toISOString().replace('T',' ').replace(/Z$/,' UTC');
@@ -26,8 +31,11 @@ function fieldNote(field,key,{full=false}={}) {
  * The data layer alone selects native samples, applies quality flags, and derives moments.
  */
 export class PlasmaPanels {
-  constructor({store=new PlasmaStore(),document=globalThis.document,delay=120,selectImpl=selectPlasma}={}) {
-    this.store=store;this.$=id=>document.getElementById(id);this.delay=delay;this.select=selectImpl;
+  constructor({store=new PlasmaStore(),document=globalThis.document,delay=120,selectImpl=selectPlasma,
+    seriesImpl=buildPlasmaSeries,onSeek=()=>{},plotFactory=options=>new PlasmaPlot(options)}={}) {
+    this.store=store;this.$=id=>document.getElementById(id);this.delay=delay;this.select=selectImpl;this.buildSeries=seriesImpl;
+    this.plotDay=null;this.plotSeries=null;this.plotInputs=new Map();
+    this.plots=Object.fromEntries(KEYS.map(key=>[key,plotFactory({element:this.$(`plasma-${key}-plot`),key,document,onSeek})]));
     this.time=null;this.pendingDay=null;this.version=0;this.controller=null;this.timer=null;this.disposed=false;
     this.retry=()=>{if(this.time!==null) this.setTime(this.time,{force:true});};
     this.$('plasma-retry').addEventListener('click',this.retry);
@@ -56,6 +64,26 @@ export class PlasmaPanels {
   }
   render(day,{loading=false,error=null}={}) {
     this.$('plasma-time').textContent=`Selected: ${utc(this.time)}`;
+    const start=day?.dayStart??dayOf(this.time),end=day?.dayEnd??start+DAY;
+    this.$('plasma-day').textContent=`${new Date(start).toISOString().slice(0,10)} · 00:00–24:00 UTC`;
+    const usable=day&&!loading&&!error?day:null;
+    if(usable!==this.plotDay) {
+      this.plotDay=usable;this.plotSeries=usable?this.buildSeries(usable):null;
+    }
+    for(const key of KEYS) {
+      const errors=Object.fromEntries(PROBES.map(probe=>[probe.id,error||
+        DEPENDENCIES[key].map(product=>day?.errors?.[probe.id]?.[product]).filter(Boolean).join('; ')||null]));
+      const previous=this.plotInputs.get(key);
+      if(!previous||previous.day!==usable||previous.start!==start||previous.end!==end||previous.loading!==loading||
+        PROBES.some(probe=>previous.errors[probe.id]!==errors[probe.id])) {
+        const native=this.plotSeries?.[key]??EMPTY_SERIES;
+        const input={day:usable,start,end,loading,errors,
+          series:Object.fromEntries(PROBES.map(probe=>[probe.id,errors[probe.id]?EMPTY_RECORDS:(native[probe.id]??EMPTY_RECORDS)])),
+          select:usable?(probe,time)=>this.select(usable,probe,time)?.fields?.[key]??null:()=>null};
+        this.plots[key].setData(input);this.plotInputs.set(key,input);
+      }
+      this.plots[key].setTime(this.time);
+    }
     for(const probe of PROBES) {
       const selected=day&&!loading&&!error?this.select(day,probe.id,this.time):null;
       let available=0,failed=false;
@@ -90,5 +118,5 @@ export class PlasmaPanels {
     ++this.version;clearTimeout(this.timer);this.timer=null;
     this.controller?.abort();this.controller=null;this.pendingDay=null;
   }
-  dispose() {this.disposed=true;this.cancel();this.$('plasma-retry').removeEventListener('click',this.retry);}
+  dispose() {this.disposed=true;this.cancel();this.$('plasma-retry').removeEventListener('click',this.retry);for(const plot of Object.values(this.plots)) plot.dispose();}
 }

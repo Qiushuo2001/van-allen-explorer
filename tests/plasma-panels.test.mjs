@@ -11,7 +11,7 @@ const missing=()=>({value:null,status:'missing',note:'No native sample within th
 const field=(value,sourceTime,note='Native source quality accepted.')=>({value,status:'valid',sourceTime,offsetMs:Date.parse(sourceTime)-t,note});
 const source=kind=>({dataset:`TEST_${kind}`,kind:'bundled',url:`https://cdaweb.gsfc.nasa.gov/hapi/data?id=TEST_${kind}`,retrievedAt:'2026-10-28T00:00:00Z'});
 function sampleDay(time=t) {
-  return {dayStart:dayOf(time),dayEnd:dayOf(time)+DAY,selections:{
+  const day={dayStart:dayOf(time),dayEnd:dayOf(time)+DAY,errors:{rbspa:{},rbspb:{}},selections:{
     rbspa:{fields:Object.fromEntries(keys.map(key=>[key,missing()])),sources:Object.fromEntries(['density','moments','field'].map(key=>[key,source(key)]))},
     rbspb:{fields:{density:field(1750,'2015-03-17T11:59:58.799999936Z','No per-record quality flag is supplied.'),
       ratio:field(4.83,'2015-03-17T11:59:58.799999936Z'),
@@ -19,6 +19,8 @@ function sampleDay(time=t) {
       beta:{...field(0.0000198,'2015-03-17T11:59:55.160Z','Scalar beta of the HOPE electron population ≥200 eV.'),fieldTime:'2015-03-17T11:59:54.001Z',fieldOffsetMs:-1159}},
       sources:Object.fromEntries(['density','moments','field'].map(key=>[key,source(key)]))}
   }};
+  day.plotSeries=Object.fromEntries(keys.map(key=>[key,Object.fromEntries(['rbspa','rbspb'].map(probe=>[probe,[{t:Date.parse(day.selections[probe].fields[key].sourceTime)||time,...day.selections[probe].fields[key]}]]))]));
+  return day;
 }
 function harness({cached=true}={}) {
   const elements=new Map(),el=id=>{
@@ -31,8 +33,14 @@ function harness({cached=true}={}) {
   const day=sampleDay(),cache=new Map(cached?[[dayOf(t),day]]:[]),requests=[],selectionCalls=[];
   const store={peekDay:time=>cache.get(dayOf(time))||null,getDay:(time,options)=>new Promise((resolve,reject)=>requests.push({time,options,resolve,reject}))};
   const selectImpl=(day,probe,time)=>{selectionCalls.push({day,probe,time});return day.selections[probe];};
-  const panels=new PlasmaPanels({store,document:{getElementById:el},delay:0,selectImpl});
-  return {panels,day,cache,requests,selectionCalls,el,text:id=>el(id).textContent};
+  const plots=new Map(),seriesCalls=[],seekCalls=[];
+  const plotFactory=options=>{
+    const plot={options,inputs:[],times:[],disposed:false,setData(input){this.data=input;this.inputs.push(input);},setTime(time){this.time=time;this.times.push(time);},dispose(){this.disposed=true;}};
+    plots.set(options.key,plot);return plot;
+  };
+  const seriesImpl=day=>{seriesCalls.push(day);return day.plotSeries;};
+  const panels=new PlasmaPanels({store,document:{getElementById:el},delay:0,selectImpl,seriesImpl,plotFactory,onSeek:time=>seekCalls.push(time)});
+  return {panels,day,cache,requests,selectionCalls,seriesCalls,plots,plotFactory,seekCalls,el,text:id=>el(id).textContent};
 }
 
 test('Plasma cards preserve per-field availability, source epochs, units context and independent probes',()=>{
@@ -130,7 +138,7 @@ test('Real NASA default-day measurements render Probe B and preserve Probe A dat
   const day=await store.getDay(t);
   for(const probe of ['rbspa','rbspb']) for(const product of ['density','moments','field']) assert.equal(day.errors[probe][product],null);
   const h=harness();h.panels.dispose();
-  const panels=new PlasmaPanels({store,document:{getElementById:h.el},delay:0});
+  const panels=new PlasmaPanels({store,document:{getElementById:h.el},delay:0,plotFactory:h.plotFactory});
   panels.setTime(t);
   assert.equal(h.text('plasma-density-rbspb'),'1750');
   assert.equal(h.text('plasma-ratio-rbspb'),'4.83');
@@ -143,5 +151,66 @@ test('Real NASA default-day measurements render Probe B and preserve Probe A dat
   for(const key of keys) assert.equal(h.text(`plasma-${key}-rbspa`),'—');
   assert.match(h.text('plasma-density-note-rbspa'),/gap/i);
   assert.match(h.text('plasma-anisotropy-note-rbspa'),/fill/i);
+  for(const key of keys) {
+    const plot=h.plots.get(key);
+    assert.equal(plot.data.start,dayOf(t));assert.equal(plot.data.end,dayOf(t)+DAY);
+    assert.ok(plot.data.series.rbspb.length>1000,'The plot receives native samples instead of resampled minute values');
+    const selected=plot.data.select('rbspb',t);
+    assert.equal(formatPlasmaValue(selected.value,key),h.text(`plasma-${key}-rbspb`),'Plot hover uses the same native-source lookup as the readout');
+  }
+  const dataRefs=[...h.plots.values()].map(plot=>plot.data);
+  panels.setTime(t+1000);
+  assert.deepEqual([...h.plots.values()].map(plot=>plot.data),dataRefs,'Playback only moves plot cursors');
   panels.dispose();
+  assert.ok([...h.plots.values()].every(plot=>plot.disposed));
+});
+
+
+test('Four plots share daily UTC axes, retain native rows and dispatch navigation without rebuilding during playback',()=>{
+  const h=harness();h.panels.setTime(t);
+  assert.match(h.text('plasma-day'),/2015-03-17 · 00:00–24:00 UTC/);
+  assert.equal(h.seriesCalls.length,1,'Prepare the day once for all four plots');
+  for(const key of keys) {
+    const plot=h.plots.get(key);
+    assert.equal(plot.options.element,h.el(`plasma-${key}-plot`));
+    assert.equal(plot.data.series.rbspb,h.day.plotSeries[key].rbspb,'Original native rows reach the renderer unchanged');
+    assert.equal(plot.data.start,dayOf(t));assert.equal(plot.data.end,dayOf(t)+DAY);
+    assert.equal(plot.time,t);assert.equal(plot.inputs.length,1);
+    assert.equal(plot.data.select('rbspb',t),h.day.selections.rbspb.fields[key]);
+  }
+  h.panels.setTime(t+22000);
+  assert.equal(h.seriesCalls.length,1,'Playback does not rederive daily histories');
+  for(const plot of h.plots.values()) {
+    assert.equal(plot.inputs.length,1,'Playback does not rebuild daily geometry');
+    assert.equal(plot.time,t+22000,'All cursors retain the exact selected second');
+  }
+  h.plots.get('density').options.onSeek(t+60000);
+  h.plots.get('beta').options.onSeek(t+3600000);
+  assert.deepEqual(h.seekCalls,[t+60000,t+3600000]);
+  h.panels.dispose();assert.ok([...h.plots.values()].every(plot=>plot.disposed));
+});
+
+test('Failed products clear only dependent probe histories; midnight and stale loads update plot axes safely',async()=>{
+  const h=harness();h.panels.setTime(t);
+  const next=sampleDay(t);next.errors.rbspa.density='Density unavailable';next.errors.rbspb.field='Field unavailable';
+  h.cache.set(dayOf(t),next);h.panels.setTime(t);
+  assert.equal(h.plots.get('density').data.series.rbspa.length,0);
+  assert.equal(h.plots.get('ratio').data.series.rbspa.length,0);
+  assert.equal(h.plots.get('density').data.errors.rbspa,'Density unavailable');
+  assert.equal(h.plots.get('density').data.series.rbspb,next.plotSeries.density.rbspb);
+  assert.equal(h.plots.get('anisotropy').data.series.rbspb,next.plotSeries.anisotropy.rbspb);
+  assert.equal(h.plots.get('beta').data.series.rbspb.length,0);
+  assert.equal(h.plots.get('beta').data.errors.rbspb,'Field unavailable');
+  const midnight=dayOf(t)+DAY;
+  h.panels.setTime(midnight);
+  for(const plot of h.plots.values()) {
+    assert.equal(plot.data.start,midnight);assert.equal(plot.data.end,midnight+DAY);
+    assert.equal(plot.data.loading,true);assert.equal(plot.data.series.rbspa.length,0);assert.equal(plot.data.series.rbspb.length,0);
+  }
+  await tick();h.panels.setTime(t);assert.equal(h.requests[0].options.signal.aborted,true);
+  const inputs=[...h.plots.values()].map(plot=>plot.inputs.length);
+  h.requests[0].resolve(sampleDay(midnight));await tick();
+  assert.deepEqual([...h.plots.values()].map(plot=>plot.inputs.length),inputs,'A stale next-day response cannot replace current plots');
+  assert.equal(h.plots.get('density').data.start,dayOf(t));
+  h.panels.dispose();
 });

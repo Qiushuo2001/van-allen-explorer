@@ -1,11 +1,11 @@
 {
   "name": "van-allen-mission-explorer",
   "private": true,
-  "version": "1.5.0",
+  "version": "1.6.0",
   "type": "module",
   "description": "Local browser viewer for definitive NASA SSCWeb Van Allen Probes ephemerides",
   "scripts": {
     "start": "node tools/serve.mjs",
-    "test": "node --test tests/ephemeris.test.mjs tests/controller.test.mjs tests/indices.test.mjs tests/index-panels.test.mjs tests/index-plot.test.mjs tests/magnetic.test.mjs tests/magnetic-panels.test.mjs tests/plasma.test.mjs tests/plasma-panels.test.mjs"
+    "test": "node --test tests/ephemeris.test.mjs tests/controller.test.mjs tests/indices.test.mjs tests/index-panels.test.mjs tests/index-plot.test.mjs tests/magnetic.test.mjs tests/magnetic-panels.test.mjs tests/plasma.test.mjs tests/plasma-panels.test.mjs tests/plasma-series.test.mjs tests/plasma-plot.test.mjs"
   }
 }

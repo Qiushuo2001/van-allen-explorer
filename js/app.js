@@ -2,7 +2,7 @@ import { EphemerisStore, PROBES, MISSION_START, MISSION_END, sampleAt } from './
 import { OrbitScene } from './scene.js';
 import { GeomagneticPanels } from './index-panels.js?v=1.4.0';
 import { MagneticPanels } from './magnetic-panels.js?v=1.4.1';
-import { PlasmaPanels } from './plasma-panels.js?v=1.5.0';
+import { PlasmaPanels } from './plasma-panels.js?v=1.6.0';
 
 const $ = id => document.getElementById(id);
 const HOUR = 3600000, DAY = 24 * HOUR, MINUTE = 60000;
@@ -21,7 +21,7 @@ const fmtTick = t => `${iso(t).slice(0,10)} ${iso(t).slice(11,16)}`;
 const store = new EphemerisStore();
 const geomagnetic = new GeomagneticPanels({onSeek:time=>seek(time)});
 const magnetic = new MagneticPanels();
-const plasma = new PlasmaPanels();
+const plasma = new PlasmaPanels({onSeek:time=>seek(time)});
 const state = {
   time: Date.parse('2015-03-17T12:00:00Z'), frame:'gse', windowMs:6*HOUR,
   intervalStart:Date.parse('2015-03-17T00:00:00Z'), intervalEnd:Date.parse('2015-03-18T00:00:00Z'),

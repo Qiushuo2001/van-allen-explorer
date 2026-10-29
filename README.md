@@ -111,7 +111,13 @@ Index sources and conventions:
 
 ## Local electron plasma conditions
 
-Two **Local Electron Plasma** cards follow selected UTC and playback independently of ephemeris availability. Each probe displays electron density in cm⁻³, archived f_pe/f_ce, electron temperature anisotropy T⊥/T∥, and scalar electron beta. The selected timestamp, actual native source timestamps, time offsets, per-field missing states, and source query links remain visible. **Refresh plasma** retries retrievals.
+Four stacked **Local Electron Plasma** plots show electron density in cm⁻³, archived f_pe/f_ce, electron temperature anisotropy T⊥/T∥, and scalar electron beta. Each plot overlays **Probe A in cyan** and **Probe B in amber**, with UTC time horizontally and the quantity's value vertically. Both probes share the same vertical scale for direct comparison; the linear scale includes zero, and small beta values use scientific notation.
+
+The plots span **00:00–24:00 on the selected UTC day**, matching the AE/SYM-H plots. The mint cursor follows selected UTC and playback, independently of ephemeris availability. Hover inspects real source samples for both probes; click chooses the nearest UTC minute and pauses playback through the common time controls. Arrow keys move one minute, Shift+Arrow one hour, and Home/End the first/last minute of the day. Changing days loads the corresponding daily history. Compact selected-value readouts and source times remain under each plot; source query links are in **Measurement sources**. **Refresh plasma** retries retrievals.
+
+Every plotted point retains its native instrument epoch: EMFISIS L4 epochs for density and frequency ratio, and HOPE electron epochs for anisotropy and beta. The original values and quality checks are reused without resampling, averaging, smoothing, or downsampling. Lines only provide visual connections between consecutive valid native records within the documented gap limits below. Fill values, rejected flags, missing records, or a source failure break the trace; one probe's failure does not remove the other's data. Isolated valid samples remain visible as points. Selected and hover markers sit at the actual matched source epoch, while the vertical cursor stays at the requested UTC; no numerical value is read from an interpolated line. Beta inspection also shows the separate measured-field epoch.
+
+Daily series and geometry are reused while the selected cursor moves, so playback does not repeatedly derive or redraw the complete history.
 
 | Quantity | Data and definition |
 |---|---|
@@ -222,7 +228,9 @@ js/index-plot.js                SVG time-series plots and UTC interaction
 js/magnetic.js                  SSCWeb magnetic-data retrieval and validation
 js/magnetic-panels.js           L/MLT/MLAT display matched to plotted sample UTC
 js/plasma.js                    Plasma retrieval, quality checks, time matching and derivation
-js/plasma-panels.js             Per-probe electron plasma readouts and independent loading
+js/plasma-panels.js             Synchronized plasma plots, readouts and independent loading
+js/plasma-series.js             Native-epoch series with source quality and derived quantities
+js/plasma-plot.js               Dual-probe SVG plots, native gaps and UTC interaction
 vendor/three.module.js          Three.js 0.170.0 (included)
 vendor/OrbitControls.js         Matching controls; import changed to local module
 vendor/THREE-LICENSE.txt        Three.js MIT license
@@ -245,7 +253,9 @@ tests/index-plot.test.mjs       Native-bin geometry, gaps, UTC axes and interact
 tests/magnetic.test.mjs         Authentic magnetic values, source hashes and retrieval
 tests/magnetic-panels.test.mjs  Position/magnetic sample alignment and gap handling
 tests/plasma.test.mjs           Real source values, quality, timing and derived physics
-tests/plasma-panels.test.mjs    Plasma display, source times and stale-request handling
+tests/plasma-panels.test.mjs    Plasma plot synchronization and stale-request handling
+tests/plasma-series.test.mjs    Native series, quality gaps and derived data integrity
+tests/plasma-plot.test.mjs      Dual-probe geometry, axes, selection and interaction
 ```
 
 Three.js and OrbitControls were obtained from the public `three@0.170.0` package via jsDelivr and are bundled with their license. No runtime CDN, font service, image service, analytics, or framework dependency is used. Uncached ephemerides and indices require a network request to NASA SSCWeb or CDAWeb. Live ephemerides are cached in memory (up to 48 daily chunks); Export preserves them across sessions. Metadata limits are deliberately pinned to the accompanying snapshot rather than silently adopting new mission coverage.

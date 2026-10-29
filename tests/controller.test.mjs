@@ -34,8 +34,8 @@ function harness() {
   class FakeScene {setFrame(){}setData(){}setVisibility(){}setView(){}resetView(){}dispose(){}}
   class FakeIndices {setTime(){}dispose(){}}
   class FakeMagnetic {setSelection(){}dispose(){}}
-  const plasmaTimes=[];
-  class FakePlasma {setTime(t){plasmaTimes.push(t);}dispose(){}}
+  const plasmaTimes=[];let plasmaSeek;
+  class FakePlasma {constructor({onSeek}={}){plasmaSeek=onSeek;}setTime(t){plasmaTimes.push(t);}dispose(){}}
   const context={PROBES,MISSION_START,MISSION_END,sampleAt,EphemerisStore:FakeStore,OrbitScene:FakeScene,GeomagneticPanels:FakeIndices,MagneticPanels:FakeMagnetic,PlasmaPanels:FakePlasma,
     document:{getElementById:get,querySelectorAll:()=>[],createTextNode:text=>({text}),createElement:()=>element(),addEventListener(){}},
     window:{addEventListener(){}},performance,AbortController,setTimeout(){return 1;},clearTimeout(){},requestAnimationFrame(){},console,
@@ -51,7 +51,7 @@ function harness() {
     else request.resolve(dataFor(request.start,request.end,errors));
     await Promise.resolve(); await Promise.resolve();
   };
-  return {state,loadData,seek,animate,get,store,click,pick,settle,plasmaTimes};
+  return {state,loadData,seek,animate,get,store,click,pick,settle,plasmaTimes,plasmaSeek};
 }
 
 test('Returning to retained data aborts a stale request and rejects its late completion',async()=>{
@@ -194,4 +194,16 @@ test('Playback and loop restart align to source minutes',()=>{
   h.get('loop').checked=true;
   h.animate(1250);
   assert.equal(h.state.time,initialTime+MINUTE);
+});
+
+
+test('Selecting a plasma plot time pauses playback and synchronizes the common controls',()=>{
+  const h=harness(),selected=initialTime+3*MINUTE;
+  h.click('play');assert.equal(h.state.playing,true);
+  h.plasmaSeek(selected);
+  assert.equal(h.state.time,selected);
+  assert.equal(h.state.playing,false);
+  assert.equal(h.get('selected-time').value,inputTime(selected));
+  assert.equal(h.get('timeline').value,String(selected/1000));
+  assert.equal(h.plasmaTimes.at(-1),selected);
 });
