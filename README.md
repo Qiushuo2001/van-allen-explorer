@@ -71,7 +71,9 @@ The start is inclusive and the end exclusive. Raw responses, exact XML requests,
 
 ## AE and SYM-H geomagnetic panels
 
-The **Geomagnetic Context** plots follow the same selected UTC time, timeline, and playback controls as the spacecraft. AE and SYM-H are shown in two aligned plots spanning the selected UTC day, with time on the horizontal axis and nT on the vertical axis. The mint cursor follows the selected time, while compact readouts retain the exact measurement, source timestamp, and quality information.
+The geomagnetic section appears above the plasma conditions section. Both sections start expanded; click their headers (or focus a header and press Enter or Space) to fold or unfold them independently. Selected time and playback continue updating while folded.
+
+The **Geomagnetic Indices** plots follow the same selected UTC time, timeline, and playback controls as the spacecraft. AE and SYM-H are shown in two aligned plots spanning the selected UTC day, with time on the horizontal axis and nT on the vertical axis. The mint cursor follows the selected time, while compact readouts retain the exact measurement, source timestamp, and quality information.
 
 Hover over a plot to inspect a measured bin and its original UTC timestamp. Click to move the spacecraft time to that UTC minute. With a plot focused, use Left/Right to move one minute, or Shift+Left/Right for one hour. Selecting a different day automatically loads and redraws that day's plots. The plot range is the selected UTC day, independent of the playback interval and trajectory window.
 

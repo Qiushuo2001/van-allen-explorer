@@ -9,10 +9,7 @@
 
 /* Measured geomagnetic time series share a UTC axis and the existing index colors. */
 .indices-section{border-top:1px solid var(--line);background:var(--panel-deep);padding:18px 26px}
-.indices-heading{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:10px}
-.indices-heading>div{display:flex;align-items:center;gap:15px;flex-wrap:wrap}
 .indices-day{font:11px var(--mono);color:#b6c6d8}
-.indices-heading .text-button{font-size:10px;flex-shrink:0;color:#bac8db}
 .plot-legend{display:flex;align-items:center;flex-wrap:wrap;gap:8px 18px;font-size:10px;color:#93a5ba;margin:0 0 15px}
 .plot-legend>span{display:flex;align-items:center;gap:6px}.plot-legend .plot-help{margin-left:auto}
 .plot-selected-key{display:inline-block;height:10px;border-left:2px solid var(--mint)}
@@ -54,8 +51,8 @@
 .index-provenance a{color:var(--index-accent);text-decoration-color:#7b6c8a;text-underline-offset:2px}.index-provenance a:hover{color:var(--text)}
 .index-quality{color:#9caabd;margin-top:2px}.index-origin{color:#8e9eb2;margin-top:2px}.index-origin:empty{display:none}
 .indices-note{font-size:10px;line-height:1.6;color:#92a3b8;margin-top:12px}
-@media(max-width:1120px){.indices-section{padding:16px 18px}.indices-heading>div{gap:5px 12px}.index-card{padding:13px}}
-@media(max-width:600px){.indices-section{padding:16px 14px}.indices-heading{align-items:flex-start}.indices-heading>div{flex-direction:column;align-items:flex-start;gap:5px}.plot-legend{gap:7px 15px}.plot-legend .plot-help{margin-left:0;flex-basis:100%}.indices-grid{gap:13px}.index-card{padding:12px 10px}.index-card-heading{gap:3px 8px}.index-card-heading>span{font-size:10px}.index-card-heading .index-resolution{font-size:8px}.index-details-row{grid-template-columns:minmax(0,1fr);gap:7px}.index-provenance{display:block}.index-number{font-size:20px}.index-selected-label{font-size:7px;letter-spacing:.4px}.plot-inspection{min-height:45px}.plot-status{left:46px;right:10px;font-size:10px}}
+@media(max-width:1120px){.indices-section{padding:16px 18px}.index-card{padding:13px}}
+@media(max-width:600px){.indices-section{padding:16px 14px}.plot-legend{gap:7px 15px}.plot-legend .plot-help{margin-left:0;flex-basis:100%}.indices-grid{gap:13px}.index-card{padding:12px 10px}.index-card-heading{gap:3px 8px}.index-card-heading>span{font-size:10px}.index-card-heading .index-resolution{font-size:8px}.index-details-row{grid-template-columns:minmax(0,1fr);gap:7px}.index-provenance{display:block}.index-number{font-size:20px}.index-selected-label{font-size:7px;letter-spacing:.4px}.plot-inspection{min-height:45px}.plot-status{left:46px;right:10px;font-size:10px}}
 
 /* NASA magnetic coordinates belong to the displayed spacecraft sample. */
 .magnetic-block{border-top:1px solid #293b4d;margin-top:13px;padding-top:11px}
@@ -81,13 +78,9 @@
 
 /* Native electron-plasma time series, with a shared UTC axis for both probes. */
 .plasma-section{border-top:1px solid var(--line);background:var(--panel-deep);padding:18px 26px}
-.plasma-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
-.plasma-heading>div{display:flex;flex-wrap:wrap;align-items:center;gap:5px 14px}
-.plasma-heading .text-button{font-size:10px;flex-shrink:0}
 .plasma-day{font:11px var(--mono);color:#b6c6d8}
 .plasma-time{font:9px var(--mono);color:#92a7bd;flex-basis:100%}
 .plasma-summary{font-size:10px;line-height:1.6;color:#9aadc2;margin:8px 0 13px;max-width:800px}
-.plasma-legend{margin-top:12px}
 .plasma-line-key{display:inline-block;width:18px;border-top:2px solid;vertical-align:middle}
 .plasma-key-a{color:var(--cyan)}.plasma-key-b{color:var(--amber)}
 .plasma-charts{display:grid;gap:16px}
@@ -129,4 +122,24 @@
 .plasma-provenance-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px}
 .plasma-provenance h3{display:flex;align-items:center;gap:6px;color:var(--plasma-accent);font-size:11px;font-weight:500}
 @media(max-width:1120px){.plasma-section{padding:16px 18px}.plasma-chart{padding:13px}}
-@media(max-width:600px){.plasma-section{padding:16px 14px}.plasma-heading>div{flex-direction:column;align-items:flex-start}.plasma-chart{padding:12px 10px}.plasma-chart-header{gap:7px}.plasma-chart-header>div{width:100%}.plasma-selected-values{justify-content:flex-start;gap:5px 15px}.plasma-selected>strong{font-size:16px}.plasma-chart-notes,.plasma-plot-inspection,.plasma-provenance-grid{grid-template-columns:1fr;gap:6px}.plasma-selected-note>p{min-height:0}.plasma-plot-inspection-row{min-height:34px}}
+@media(max-width:600px){.plasma-section{padding:16px 14px}.plasma-chart{padding:12px 10px}.plasma-chart-header{gap:7px}.plasma-chart-header>div{width:100%}.plasma-selected-values{justify-content:flex-start;gap:5px 15px}.plasma-selected>strong{font-size:16px}.plasma-chart-notes,.plasma-plot-inspection,.plasma-provenance-grid{grid-template-columns:1fr;gap:6px}.plasma-selected-note>p{min-height:0}.plasma-plot-inspection-row{min-height:34px}}
+
+/* Native disclosure headers keep both plot sections keyboard accessible. */
+.panel-disclosure{min-width:0}
+.panel-toggle{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:32px;cursor:pointer;list-style:none;border-radius:4px}
+.panel-toggle::-webkit-details-marker{display:none}
+.panel-toggle::marker{content:""}
+.panel-toggle:focus-visible{outline:2px solid var(--mint);outline-offset:6px}
+.panel-heading{display:flex;flex-wrap:wrap;align-items:center;gap:5px 14px;min-width:0}
+.panel-toggle-hint{display:flex;align-items:center;gap:8px;flex-shrink:0;font:10px var(--mono);color:#a9becf}
+.panel-toggle-hint svg{fill:none;stroke:currentColor;stroke-width:1.5;transform:rotate(-90deg)}
+.panel-toggle:hover .panel-toggle-hint{color:var(--mint)}
+.panel-collapse-label{display:none}
+.panel-disclosure[open]>.panel-toggle .panel-collapse-label{display:inline}
+.panel-disclosure[open]>.panel-toggle .panel-expand-label{display:none}
+.panel-disclosure[open]>.panel-toggle svg{transform:rotate(0)}
+.panel-content{padding-top:14px}
+.panel-tools{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin-bottom:15px}
+.panel-tools .plot-legend{flex:1 1 340px;margin:0}
+.panel-tools>.text-button{flex-shrink:0;font-size:10px;color:#bac8db;margin-left:auto}
+@media(max-width:600px){.panel-toggle{align-items:flex-start}.panel-heading{flex-direction:column;align-items:flex-start}.panel-toggle-hint{padding-top:2px}.panel-tools{gap:10px}.panel-tools .plot-legend{flex-basis:100%}}
